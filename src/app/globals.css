@@ -1,0 +1,183 @@
+@import "tailwindcss";
+
+/*
+  Design tokens. Clean clinical light theme for the storefront, with a deep
+  navy for the header, hero and footer.
+
+  Token names are semantic, not literal colors:
+    void      page background            bone      primary text / dark buttons
+    ink-950   alternate section bg       bone-dim  secondary text
+    ink-900   card surface               mute      supporting text
+    line      hairline borders           faint     captions, meta
+    caliper   brand accent (blue)        phosphor  success / progress (teal)
+*/
+@theme {
+  --color-void: #ffffff;
+  --color-ink-950: #f5f7fa;
+  --color-ink-900: #ffffff;
+  --color-ink-800: #f1f4f8;
+  --color-ink-700: #e8edf3;
+  --color-ink-600: #d6dee8;
+  --color-bone: #0d1b2e;
+  --color-bone-dim: #33445a;
+  --color-mute: #56667c;
+  --color-faint: #7d8ba0;
+  --color-line: #e3e8ef;
+  --color-line-strong: #cdd6e1;
+  --color-caliper: #1a5bd0;
+  --color-caliper-deep: #1447a8;
+  --color-phosphor: #0d8a78;
+  --color-doppler-red: #cf3f3f;
+  --color-doppler-blue: #2f6fe0;
+  --color-paper: #f7f4ec;
+  --color-paper-ink: #16171b;
+
+  --color-navy: #0b1f3a;
+  --color-navy-deep: #071528;
+  --color-sky: #35a3de;
+  --color-gold: #b58b33;
+  --color-gold-soft: #f6efdf;
+
+  --font-display: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-instrument), "Iowan Old Style", Georgia, serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, "SFMono-Regular", monospace;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --animate-shimmer: shimmer 6s linear infinite;
+
+  @keyframes shimmer {
+    to { --shimmer-angle: 360deg; }
+  }
+}
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+@keyframes drift {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(4%, -6%, 0) scale(1.08); }
+}
+
+@property --shimmer-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@layer base {
+  html {
+    color-scheme: light;
+    background: var(--color-void);
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    background: var(--color-void);
+    color: var(--color-bone);
+    font-family: var(--font-sans);
+    text-rendering: optimizeLegibility;
+  }
+  ::selection {
+    background: rgb(26 91 208 / 0.18);
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-caliper);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+  h1, h2, h3 {
+    text-wrap: balance;
+  }
+  p {
+    text-wrap: pretty;
+  }
+  /* Headlines use weight for emphasis, never decorative italics. */
+  h1 em, h2 em, h3 em {
+    font-style: normal;
+  }
+}
+
+@layer utilities {
+  .font-display {
+    font-weight: 700;
+    letter-spacing: -0.022em;
+  }
+}
+
+@layer components {
+  .eyebrow {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-caliper);
+  }
+
+  .panel {
+    background: var(--color-ink-900);
+    border: 1px solid var(--color-line);
+    border-radius: 12px;
+    box-shadow: 0 1px 2px rgb(13 27 46 / 0.04);
+  }
+
+  .holo {
+    background: conic-gradient(from var(--shimmer-angle), #b58b33, #35a3de, #1a5bd0, #0d8a78, #b58b33);
+    animation: var(--animate-shimmer);
+  }
+
+  .select-chevron {
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%2356667c' stroke-width='1.6'><path d='M2 4.5 6 8.5l4-4'/></svg>");
+    background-position: right 14px center;
+    background-repeat: no-repeat;
+  }
+
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { scrollbar-width: none; }
+
+  /* Light panels nested inside a dark surface (e.g. the header's mega menu). */
+  .light-scope {
+    --color-bone: #0d1b2e;
+    --color-bone-dim: #33445a;
+    --color-mute: #56667c;
+    --color-faint: #7d8ba0;
+    --color-line: #e3e8ef;
+    --color-line-strong: #cdd6e1;
+    --color-ink-950: #f5f7fa;
+    --color-ink-900: #ffffff;
+    --color-caliper: #1a5bd0;
+    color: var(--color-bone);
+  }
+
+  /* Dark surfaces (header, hero, footer): flip the text tokens locally. */
+  .on-dark {
+    --color-bone: #f3f6fb;
+    --color-bone-dim: #c9d3e1;
+    --color-mute: #a3b3c8;
+    --color-faint: #7d91ab;
+    --color-line: rgb(255 255 255 / 0.12);
+    --color-line-strong: rgb(255 255 255 / 0.24);
+    --color-ink-950: #0b1f3a;
+    --color-ink-900: #0f2645;
+    --color-ink-800: #14304f;
+    --color-caliper: #7cb8ff;
+    --color-phosphor: #5fd6c3;
+    color: var(--color-bone);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@media print {
+  .no-print { display: none !important; }
+  html, body { background: #fff !important; }
+}
