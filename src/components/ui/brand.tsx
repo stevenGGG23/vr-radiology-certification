@@ -25,8 +25,8 @@ export function Logo({ className, compact = false }: { className?: string; compa
       <LogoMark className="transition-transform duration-500 ease-out group-hover:rotate-[-8deg]" />
       {!compact && (
         <span className="flex flex-col whitespace-nowrap leading-none">
-          <span className="text-[16px] font-bold tracking-[-0.02em] sm:text-[18px]">Rudy Imaging</span>
-          <span className="mt-[3px] text-[9.5px] font-semibold uppercase tracking-[0.3em] text-mute">Academy</span>
+          <span className="text-[16px] font-bold tracking-[-0.02em] sm:text-[18px]">Sonosus VR</span>
+          <span className="mt-[3px] text-[9.5px] font-semibold uppercase tracking-[0.3em] text-mute">Education</span>
         </span>
       )}
     </Link>

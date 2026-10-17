@@ -26,7 +26,7 @@ const columns = [
     ],
   },
   {
-    title: "Academy",
+    title: "About",
     links: [
       { href: "/about", label: "About the course author" },
       { href: "/teams", label: "Group & institutional pricing" },

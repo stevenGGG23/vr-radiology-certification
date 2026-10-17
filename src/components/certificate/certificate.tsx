@@ -12,7 +12,8 @@ export interface CertificateData {
   courseTitle: string;
   courseCode: string;
   ceHours: number;
-  score: number;
+  /** Kept on the record for the academy; never printed. Certificates are pass/fail. */
+  score?: number;
   issuedAt: string;
 }
 
@@ -45,7 +46,7 @@ function Seal() {
           <path id="seal-ring" d="M50,50 m-36,0 a36,36 0 1,1 72,0 a36,36 0 1,1 -72,0" />
         </defs>
         <text fontSize="7.4" letterSpacing="2.4" fill="#16171b" fontFamily="var(--font-plex-mono)">
-          <textPath href="#seal-ring">VERIFIED · RUDY IMAGING ACADEMY ·</textPath>
+          <textPath href="#seal-ring">VERIFIED · SONOSUS VR EDUCATION ·</textPath>
         </text>
       </svg>
       <LogoMark className="relative h-[38%] w-[38%] text-paper-ink" />
@@ -85,7 +86,7 @@ export function Certificate({
           <div className="mt-[1.2cqw] h-px w-[46cqw] bg-paper-ink/25" />
           <p className="mt-[1.8cqw] max-w-[66cqw] text-[1.6cqw] leading-[1.5] text-paper-ink/80">
             has completed <span className="font-semibold text-paper-ink">{data.courseTitle}</span> ({data.courseCode}) and
-            passed the final examination with a score of {data.score}%.
+            successfully passed the final examination.
           </p>
 
           <div className="mt-auto grid w-full grid-cols-[1fr_auto_1fr] items-end gap-[3cqw]">

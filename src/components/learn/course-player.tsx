@@ -96,7 +96,7 @@ function ExamCard({ course, enrollment }: { course: Course; enrollment?: Enrollm
       </div>
       {cert ? (
         <>
-          <p className="mt-1.5 text-[13px] text-mute">Passed with {cert.score}%. Nice work.</p>
+          <p className="mt-1.5 text-[13px] text-mute">You passed. Nice work.</p>
           <ButtonLink href={`/certificates/${cert.id}`} size="sm" className="mt-3 w-full">View certificate</ButtonLink>
         </>
       ) : progress < 100 ? (

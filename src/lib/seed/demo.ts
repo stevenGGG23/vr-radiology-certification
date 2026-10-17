@@ -9,7 +9,7 @@ import { site } from "../site";
 export const defaultSettings: SiteSettings = {
   announcement: "Now enrolling: Lung & Pleural Ultrasound. Every course includes 12 months of access.",
   announcementOn: true,
-  supportEmail: "support@rudyimaging.academy",
+  supportEmail: "support@sonosusvr.org",
   supportPhone: "(000) 000-0000",
   accreditationStatement:
     "Continuing education credit designation is pending. Final contact hours and the accrediting body will be listed here once approved.",
@@ -85,7 +85,7 @@ export function buildDemoDb() {
         });
         if (passed) {
           certificates.push({
-            id: `RIA-DEMO-${1000 + i * 37 + k}`,
+            id: `SVR-DEMO-${1000 + i * 37 + k}`,
             userId: id, courseId, recipientName: name, courseTitle: "", courseCode: courseId.toUpperCase(),
             ceHours: 0, score, issuedAt: day(i * 11 + k * 9 + 20),
           });

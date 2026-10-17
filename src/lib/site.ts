@@ -3,11 +3,10 @@
   or turn demo mode off here.
 */
 export const site = {
-  name: "Rudy Imaging Academy",
-  shortName: "Rudy Imaging",
-  /** Placeholder until the domain is purchased. */
-  domain: "rudyimaging.academy",
-  url: "https://rudyimaging.academy",
+  name: "Sonosus VR Education",
+  shortName: "Sonosus VR",
+    domain: "sonosusvr.org",
+  url: "https://sonosusvr.org",
   tagline: "Bedside imaging education for advanced practice providers.",
   description:
     "Self-paced point-of-care ultrasound and emergency imaging courses by Dr. Susanna Rudy, DNP. Watch, pass the exam, and earn a verifiable certificate.",
@@ -34,7 +33,7 @@ export const site = {
    */
   demoMode: process.env.NEXT_PUBLIC_DEMO_MODE !== "false",
   /** Demo admin account (Studio). Real auth replaces this entirely. */
-  demoAdminEmail: "susanna@rudyimaging.academy",
+  demoAdminEmail: "susanna@sonosusvr.org",
 } as const;
 
 export const categories: { id: string; label: string; short: string }[] = [

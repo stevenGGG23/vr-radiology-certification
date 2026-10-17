@@ -38,7 +38,7 @@ export function VerifyForm() {
           <input
             value={value}
             onChange={(e) => setValue(e.target.value)}
-            placeholder="RIA-XXXX-XXXX"
+            placeholder="SVR-XXXX-XXXX"
             aria-label="Certificate ID"
             className="h-12 w-full rounded-xl border border-line-strong bg-ink-900/70 pl-11 pr-4 font-mono text-[16px] uppercase tracking-[0.08em] text-bone placeholder:text-faint focus:border-caliper/60 focus:outline-none"
           />
@@ -66,7 +66,7 @@ export function VerifyForm() {
                     ["Issued to", result.cert.recipientName],
                     ["Course", `${result.cert.courseTitle} (${result.cert.courseCode})`],
                     ["Date issued", formatDate(result.cert.issuedAt)],
-                    ["Exam score", `${result.cert.score}%`],
+                    ["Final exam", "Passed"],
                     ["Contact hours", `${result.cert.ceHours.toFixed(1)} (pending accreditation)`],
                     ["Certificate ID", result.cert.id],
                   ].map(([k, v]) => (
@@ -83,7 +83,7 @@ export function VerifyForm() {
                 <div>
                   <div className="text-[16px] text-bone">No certificate found for {result.q}</div>
                   <p className="mt-1 text-[14px] text-mute">
-                    Check the ID for typos. IDs look like RIA-7KQ2-M9XD. If it still doesn&apos;t match, contact {" "}
+                    Check the ID for typos. IDs look like SVR-7KQ2-M9XD. If it still doesn&apos;t match, contact {" "}
                     <span className="text-bone-dim">support@{site.domain}</span>.
                   </p>
                 </div>
@@ -94,7 +94,7 @@ export function VerifyForm() {
       </AnimatePresence>
       {site.demoMode && (
         <p className="mt-8 text-[12.5px] text-faint">
-          Draft preview: verification checks certificates stored in this browser. Try demo IDs RIA-DEMO-1038 or RIA-DEMO-1074.
+          Draft preview: verification checks certificates stored in this browser. Try demo IDs SVR-DEMO-1038 or SVR-DEMO-1074.
         </p>
       )}
     </div>

@@ -151,7 +151,7 @@ function DashboardInner() {
             <li key={c.id} className="flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <div className="text-[16px] text-bone">{c.courseTitle}</div>
-                <div className="mt-1 font-mono text-[12px] text-faint">{c.id} · Issued {formatDate(c.issuedAt, "short")} · Score {c.score}%</div>
+                <div className="mt-1 font-mono text-[12px] text-faint">{c.id} · Issued {formatDate(c.issuedAt, "short")} · Passed</div>
               </div>
               <ButtonLink href={`/certificates/${c.id}`} size="sm" variant="secondary" iconRight={<ArrowRight className="h-3.5 w-3.5" />}>Open</ButtonLink>
             </li>

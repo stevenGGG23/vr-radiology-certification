@@ -1,5 +1,6 @@
-# Rudy Imaging Academy (draft) 
-https://vr-radiology-certification-ahmh1unff-stevenggg23s-projects.vercel.app/ 
+# Sonosus VR Education (draft)
+
+Preview: https://vr-radiology-certification-ahmh1unff-stevenggg23s-projects.vercel.app/
 
 Online course store for Dr. Susanna Rudy's point-of-care ultrasound and emergency imaging curriculum:
 course catalog, course pages, cart and checkout, video lessons behind a paywall, a final exam with two
@@ -20,10 +21,19 @@ npm run build      # production build check
 
 - **Draft tools** button (footer, phone menu, Studio sidebar): sign in as a student, open the Studio as
   Dr. Rudy, or reset all demo data.
-- **Admin (Studio) login:** `susanna@rudyimaging.academy`, any password, then `/studio`.
+- **Admin (Studio) login:** `susanna@sonosusvr.org`, any password, then `/studio`.
 - **Promo code:** `RUDY10` (10% off).
-- **Verify page:** try `RIA-DEMO-1038`, or the ID on any certificate you earn.
+- **Verify page:** try `SVR-DEMO-1038`, or the ID on any certificate you earn.
+- Certificates are pass/fail: they never show the exam score.
 - In a lesson, "Draft tool: mark all lessons complete" unlocks the exam quickly.
+
+## Domains
+
+One Vercel project serves both domains (add both under Project → Settings → Domains):
+
+- **sonosusvr.org**: Sonosus VR Education (this course site). Make it the primary domain.
+- **sonosusvr.com**: Sonosus VR, Virtual Response On Call. Its home page is rewritten to `/on-call`
+  (see `rewrites` in `next.config.ts`); edit that page in `src/app/(oncall)/on-call/page.tsx`.
 
 ## Where things live
 

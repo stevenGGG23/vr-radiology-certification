@@ -119,7 +119,7 @@ export function StudioStudents() {
                           <div className="text-[14.5px] text-bone">{c.title}</div>
                           <div className="font-mono text-[11.5px] text-faint">Enrolled {formatDate(e.purchasedAt, "short")} · expires {formatDate(e.expiresAt, "short")}</div>
                         </div>
-                        {cert && <Tag tone="phosphor"><BadgeCheck className="h-3 w-3" /> {cert.score}%</Tag>}
+                        {cert && <Tag tone="phosphor"><BadgeCheck className="h-3 w-3" /> Certified</Tag>}
                       </div>
                       <ProgressBar value={progressFor(c, e.completedLessonIds)} className="mt-3" />
                       <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-[12.5px]">

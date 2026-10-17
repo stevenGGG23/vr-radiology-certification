@@ -62,7 +62,7 @@ function Gallery({ course, catalog }: { course: Course; catalog: Course[] }) {
         <div className="grid aspect-[4/3] place-items-center bg-ink-950 p-[6%]">
           <Certificate
             className="w-full"
-            data={{ id: "RIA-SAMPLE-0001", recipientName: "Your Name, Credentials", courseTitle: course.title, courseCode: course.code, ceHours: ceHoursFor(course, catalog), score: 90, issuedAt: "2026-10-12T00:00:00.000Z" }}
+            data={{ id: "SVR-SAMPLE-0001", recipientName: "Your Name, Credentials", courseTitle: course.title, courseCode: course.code, ceHours: ceHoursFor(course, catalog), issuedAt: "2026-10-12T00:00:00.000Z" }}
           />
         </div>
       ),

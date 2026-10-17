@@ -62,7 +62,7 @@ function certificateId() {
   const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   const bytes = crypto.getRandomValues(new Uint8Array(8));
   const chars = Array.from(bytes, (b) => alphabet[b % alphabet.length]).join("");
-  return `RIA-${chars.slice(0, 4)}-${chars.slice(4)}`;
+  return `SVR-${chars.slice(0, 4)}-${chars.slice(4)}`;
 }
 
 function freshDb(): Db {
@@ -245,7 +245,9 @@ export const useSession = create<SessionState>()(
     }),
     {
       name: "ria-session",
-      version: 1,
+      // Bump to reset everyone's demo data when the seed changes.
+      version: 2,
+      migrate: () => ({ db: freshDb(), currentUserId: null }),
       storage: createJSONStorage(() => localStorage),
       skipHydration: true,
       partialize: (s) => ({ db: s.db, currentUserId: s.currentUserId }),

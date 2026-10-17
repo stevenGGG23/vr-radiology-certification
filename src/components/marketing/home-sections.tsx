@@ -294,7 +294,7 @@ export function CertificateBand() {
         </Reveal>
         <Reveal delay={0.08}>
           <Certificate
-            data={{ id: "RIA-7KQ2-M9XD", recipientName: "Jordan A. Example, FNP-C", courseTitle: "eFAST: Trauma Ultrasound", courseCode: "RIA-110", ceHours: 5.5, score: 88, issuedAt: "2026-10-12T00:00:00.000Z" }}
+            data={{ id: "SVR-7KQ2-M9XD", recipientName: "Jordan A. Example, FNP-C", courseTitle: "eFAST: Trauma Ultrasound", courseCode: "SVR-110", ceHours: 5.5, issuedAt: "2026-10-12T00:00:00.000Z" }}
             className="rotate-[-1deg]"
           />
         </Reveal>

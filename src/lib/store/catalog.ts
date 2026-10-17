@@ -49,7 +49,7 @@ export const useCatalog = create<CatalogState>()(
     {
       name: "ria-catalog",
       // Bump when the seed catalog changes shape; older drafts reset to the new seed.
-      version: 2,
+      version: 3,
       migrate: () => ({ courses: seedCourses, settings: defaultSettings }),
       storage: createJSONStorage(() => localStorage),
       skipHydration: true,

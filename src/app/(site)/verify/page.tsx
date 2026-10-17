@@ -5,7 +5,7 @@ import { Container } from "@/components/ui/primitives";
 
 export const metadata: Metadata = {
   title: "Verify a certificate",
-  description: "Confirm that a Rudy Imaging Academy certificate is genuine.",
+  description: "Confirm that a Sonosus VR Education certificate is genuine.",
 };
 
 export default function VerifyPage() {

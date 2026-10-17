@@ -183,7 +183,7 @@ function EditorForm({ initial, isNew }: { initial: Course; isNew: boolean }) {
       ...draft,
       id: draft.id || uid("c"),
       slug,
-      code: draft.code || `RIA-${slug.slice(0, 3).toUpperCase()}`,
+      code: draft.code || `SVR-${slug.slice(0, 3).toUpperCase()}`,
       includes: isBundle ? draft.includes ?? [] : undefined,
     };
     saveCourse(final);
@@ -267,7 +267,7 @@ function EditorForm({ initial, isNew }: { initial: Course; isNew: boolean }) {
                   <Input id="e-slug" value={draft.slug} onChange={(e) => set("slug", slugify(e.target.value))} />
                 </Field>
                 <Field label="Course code" htmlFor="e-code">
-                  <Input id="e-code" value={draft.code} onChange={(e) => set("code", e.target.value.toUpperCase())} placeholder="RIA-160" />
+                  <Input id="e-code" value={draft.code} onChange={(e) => set("code", e.target.value.toUpperCase())} placeholder="SVR-160" />
                 </Field>
               </div>
               <div className="grid gap-5 sm:grid-cols-3">

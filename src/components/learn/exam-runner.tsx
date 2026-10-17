@@ -314,7 +314,7 @@ function ExamInner({ slug }: { slug: string }) {
   /* ----------------------------------------------------------- intro */
   const blocked =
     !enrollment ? { title: "Enroll to take this exam", body: "The final exam is included with course enrollment.", cta: { href: `/checkout/${course.slug}`, label: "Enroll now" } }
-    : cert ? { title: "You've already passed", body: `Score ${cert.score}%. Your certificate is ready.`, cta: { href: `/certificates/${cert.id}`, label: "View certificate" } }
+    : cert ? { title: "You've already passed", body: "Your certificate is ready.", cta: { href: `/certificates/${cert.id}`, label: "View certificate" } }
     : progress < 100 ? { title: "Finish the lessons first", body: `The exam unlocks when every lesson is complete. You're ${progress}% of the way there.`, cta: { href: `/learn/${course.slug}`, label: "Continue learning" } }
     : left <= 0 ? { title: "No attempts remaining", body: "You've used both attempts. Contact support about additional attempts.", cta: { href: "/contact", label: "Contact support" } }
     : course.exam.questions.length === 0 ? { title: "Exam coming soon", body: "Dr. Rudy is finalizing the questions for this course.", cta: { href: `/learn/${course.slug}`, label: "Back to lessons" } }
