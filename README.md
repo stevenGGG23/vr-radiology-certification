@@ -1,4 +1,5 @@
-# Rudy Imaging Academy (draft)
+# Rudy Imaging Academy (draft) 
+https://vr-radiology-certification-ahmh1unff-stevenggg23s-projects.vercel.app/ 
 
 Online course store for Dr. Susanna Rudy's point-of-care ultrasound and emergency imaging curriculum:
 course catalog, course pages, cart and checkout, video lessons behind a paywall, a final exam with two
