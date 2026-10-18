@@ -40,3 +40,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Google OAuth client downloads (contain the client secret)
+client_secret*.json
+*.apps.googleusercontent.com.json
