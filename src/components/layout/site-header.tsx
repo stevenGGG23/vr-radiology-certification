@@ -14,9 +14,10 @@ import { ButtonLink } from "@/components/ui/button";
 import { cn } from "@/lib/cn";
 import { formatPrice, initials } from "@/lib/format";
 import { categories, site } from "@/lib/site";
+import { signOutEverywhere } from "@/lib/auth-client";
 import { useCart } from "@/lib/store/cart";
 import { useCatalog } from "@/lib/store/catalog";
-import { useCurrentUser, useHydration, useSession } from "@/lib/store/session";
+import { useCurrentUser, useHydration } from "@/lib/store/session";
 import type { Course } from "@/lib/types";
 
 const links = [
@@ -248,7 +249,6 @@ export function CartDrawer() {
 
 function AccountButton() {
   const user = useCurrentUser();
-  const signOut = useSession((s) => s.signOut);
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -298,9 +298,8 @@ function AccountButton() {
             ))}
             <button
               onClick={() => {
-                signOut();
                 setOpen(false);
-                router.push("/");
+                signOutEverywhere().finally(() => router.push("/"));
               }}
               className="mt-1 flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-[14px] text-[#33445a] hover:bg-[#f5f7fa]"
             >

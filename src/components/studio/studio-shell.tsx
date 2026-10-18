@@ -8,8 +8,9 @@ import { RequireAuth } from "@/components/auth/require-auth";
 import { DemoToolbar } from "@/components/layout/demo-toolbar";
 import { LogoMark } from "@/components/ui/brand";
 import { cn } from "@/lib/cn";
+import { signOutEverywhere } from "@/lib/auth-client";
 import { site } from "@/lib/site";
-import { useCurrentUser, useSession } from "@/lib/store/session";
+import { useCurrentUser } from "@/lib/store/session";
 
 const items = [
   { href: "/studio", label: "Overview", icon: LayoutDashboard },
@@ -45,7 +46,6 @@ function NavItems({ onPick }: { onPick?: () => void }) {
 
 function Sidebar({ onPick }: { onPick?: () => void }) {
   const user = useCurrentUser();
-  const signOut = useSession((s) => s.signOut);
   return (
     <div className="flex h-full flex-col">
       <Link href="/studio" className="flex items-center gap-2.5 px-3 py-1 text-bone">
@@ -64,10 +64,11 @@ function Sidebar({ onPick }: { onPick?: () => void }) {
         </Link>
         <button
           onClick={() => {
-            signOut();
-            // Full reload so no admin state lingers in memory after signing out.
-            // eslint-disable-next-line @next/next/no-location-assign-relative-destination
-            window.location.href = "/";
+            // Full reload afterwards so no admin state lingers in memory.
+            signOutEverywhere().finally(() => {
+              // eslint-disable-next-line @next/next/no-location-assign-relative-destination
+              window.location.href = "/";
+            });
           }}
           className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-[13.5px] text-mute hover:text-bone"
         >

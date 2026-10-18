@@ -2,7 +2,9 @@ import type { ComponentProps, ReactNode } from "react";
 import { cn } from "@/lib/cn";
 
 export function Container({ className, ...props }: ComponentProps<"div">) {
-  return <div className={cn("mx-auto w-full max-w-[1240px] px-5 sm:px-8", className)} {...props} />;
+  // A max-w-* passed in replaces the default page width instead of competing with it.
+  const customWidth = /(^|\s)max-w-/.test(className ?? "");
+  return <div className={cn("mx-auto w-full px-5 sm:px-8", !customWidth && "max-w-[1240px]", className)} {...props} />;
 }
 
 export function Tag({

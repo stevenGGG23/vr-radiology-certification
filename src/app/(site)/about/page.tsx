@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import type { Metadata } from "next";
-import { ArrowRight, Award, BookOpenText, Globe2, GraduationCap, Presentation } from "lucide-react";
+import { ArrowRight, Award, BookOpenText, Globe2, GraduationCap, Presentation, ShieldCheck } from "lucide-react";
 import { ButtonLink } from "@/components/ui/button";
 import { Container } from "@/components/ui/primitives";
 import { site } from "@/lib/site";
@@ -13,12 +13,41 @@ export const metadata: Metadata = {
 const credentials = ["DNP", "MFS", "AG-ACNP", "FNP", "ENP", "CCRN"];
 
 const timeline = [
-  { when: "Nursing", body: "Began in the emergency department of a Level I trauma center, then more than a decade at UC San Diego Medical Center caring for high-acuity patients across emergency, critical care, flight (Life Flight) and hyperbaric medicine." },
-  { when: "Education", body: "MSN and DNP from Vanderbilt University, Master of Forensic Science, graduate work in humanitarian and disaster medicine, and Emory University's fellowship in critical care advanced practice nursing." },
-  { when: "2016", body: "Joined Vanderbilt University School of Nursing faculty in the Emergency Nurse Practitioner program, and became the first emergency nurse practitioner in Vanderbilt University Medical Center's emergency department." },
-  { when: "2017", body: "Became Instructor of Point of Care Ultrasound and created Introduction to Point of Care Ultrasound for the Advanced Practice Provider: a 14-week course with 40 hours of hands-on and didactic training." },
-  { when: "2021", body: "Her work using virtual reality in ultrasound education received international awards: Learn X Platinum, Brandon Hall Group Gold, and a Learning Technologies shortlist." },
-  { when: "Today", body: `Still practicing as an emergency and acute care nurse practitioner, and turning three years of recorded teaching into the courses on ${site.name}.` },
+  {
+    when: "Early career",
+    title: "Emergency nursing at a Level I trauma center",
+    body: "Started her career in the emergency department at Johns Hopkins Hospital.",
+  },
+  {
+    when: "1998 – 2012",
+    title: "UC San Diego Medical Center",
+    body: "Cared for high-acuity patients across emergency, critical care, Life Flight and hyperbaric medicine.",
+  },
+  {
+    when: "2014 – 2016",
+    title: "Doctorate and critical care fellowship",
+    body: "Earned her DNP at Vanderbilt and completed Emory University's critical care fellowship for advanced practice nurses.",
+  },
+  {
+    when: "2016",
+    title: "Vanderbilt University School of Nursing",
+    body: "Joined the faculty of the Emergency Nurse Practitioner program and became the first emergency nurse practitioner in Vanderbilt University Medical Center's emergency department.",
+  },
+  {
+    when: "2017",
+    title: "Created Vanderbilt's ultrasound course",
+    body: "Built Introduction to Point of Care Ultrasound for the Advanced Practice Provider: 14 weeks and 40 hours of hands-on and classroom training.",
+  },
+  {
+    when: "2021",
+    title: "International awards for VR training",
+    body: "Her virtual reality ultrasound education project won Learn X Platinum and Brandon Hall Group Gold.",
+  },
+  {
+    when: "Today",
+    title: "Clinician, educator and course author",
+    body: `Practices as an emergency nurse practitioner, teaches at Vanderbilt, and brings her courses online through ${site.name}.`,
+  },
 ];
 
 export default function AboutPage() {
@@ -36,6 +65,10 @@ export default function AboutPage() {
                 <span key={c} className="rounded-md border border-line-strong bg-white px-2.5 py-1 text-[13px] font-semibold text-bone-dim">{c}</span>
               ))}
             </div>
+            <p className="mt-3 flex items-center gap-2 text-[14px] font-medium text-bone-dim">
+              <ShieldCheck className="h-4 w-4 shrink-0 text-phosphor" />
+              Licensed in 48 states, with the remaining two in progress
+            </p>
             <p className="mt-6 max-w-2xl text-[16.5px] leading-relaxed text-bone-dim">
               Board-certified as an emergency, family and adult-gerontology acute care nurse practitioner, with more than
               30 years in emergency departments, critical care, flight and disaster response, and she still practices
@@ -55,8 +88,9 @@ export default function AboutPage() {
               {timeline.map((t) => (
                 <li key={t.when} className="relative">
                   <span className="absolute -left-[31px] top-1.5 h-3 w-3 rounded-full border-2 border-[#1a5bd0] bg-white" />
-                  <div className="text-[13px] font-bold uppercase tracking-[0.08em] text-caliper">{t.when}</div>
-                  <p className="mt-1 text-[15.5px] leading-relaxed text-bone-dim">{t.body}</p>
+                  <div className="text-[12.5px] font-bold uppercase tracking-[0.08em] text-caliper">{t.when}</div>
+                  <h3 className="mt-1 text-[16px] font-semibold text-bone">{t.title}</h3>
+                  <p className="mt-1 text-[15px] leading-relaxed text-mute">{t.body}</p>
                 </li>
               ))}
             </ol>

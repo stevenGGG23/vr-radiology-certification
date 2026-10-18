@@ -42,6 +42,6 @@ export const faqs: { q: string; a: string; group: "Courses" | "Exams & certifica
   {
     group: "Accounts & billing",
     q: "What is the refund policy?",
-    a: "Refunds are available within 14 days of purchase if you've completed less than 20% of the course and haven't attempted the exam. (Placeholder policy, to be confirmed.)",
+    a: "Refunds are available within 14 days of purchase if you've completed less than 20% of the course and haven't started the final exam. See the Refund Policy for details.",
   },
 ];

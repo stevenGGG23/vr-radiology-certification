@@ -7,6 +7,8 @@ export const site = {
   shortName: "Sonosus VR",
   domain: "sonosusvr.org",
   url: "https://sonosusvr.org",
+  /** Public support address (planned; confirm with Dr. Rudy before launch). */
+  supportEmail: "support@sonosusvr.org",
   tagline: "Bedside imaging education for advanced practice providers.",
   description:
     "Self-paced point-of-care ultrasound and emergency imaging courses by Dr. Susanna Rudy, DNP. Watch, pass the exam, and earn a verifiable certificate.",

@@ -5,7 +5,7 @@ import { createJSONStorage, persist } from "zustand/middleware";
 import { buildDemoDb } from "../seed/demo";
 import { seedCourses } from "../seed/courses";
 import { site } from "../site";
-import type { Certificate, Course, Enrollment, ExamAttempt, Order, User } from "../types";
+import type { Certificate, Course, Enrollment, ExamAttempt, Order, Role, User } from "../types";
 
 /*
   DEMO-ONLY "backend". Accounts, purchases, progress, exam attempts and
@@ -39,6 +39,8 @@ interface SessionState {
   currentUserId: string | null;
   signIn: (email: string) => Result;
   signUp: (input: SignUpInput) => Result;
+  /** Sign in with an identity verified elsewhere (Google). Creates the account on first visit. */
+  signInWithProvider: (identity: { name?: string | null; email: string; role?: Role }) => void;
   signOut: () => void;
   updateProfile: (patch: Partial<Pick<User, "name" | "credential" | "licenseNumber" | "organization">>) => void;
   purchase: (course: Course) => Order | null;
@@ -117,6 +119,26 @@ export const useSession = create<SessionState>()(
         };
         set({ db: { ...db, users: [...db.users, user] }, currentUserId: user.id });
         return { ok: true };
+      },
+
+      signInWithProvider: ({ name, email, role }) => {
+        const { db } = get();
+        const clean = email.trim().toLowerCase();
+        const existing = db.users.find((u) => u.email.toLowerCase() === clean);
+        if (existing) {
+          const updated: User = { ...existing, role: role ?? existing.role };
+          set({ db: { ...db, users: db.users.map((u) => (u.id === existing.id ? updated : u)) }, currentUserId: existing.id });
+          return;
+        }
+        const user: User = {
+          id: newId("u"),
+          name: name?.trim() || clean.split("@")[0],
+          email: clean,
+          credential: "",
+          role: role ?? "student",
+          createdAt: new Date().toISOString(),
+        };
+        set({ db: { ...db, users: [...db.users, user] }, currentUserId: user.id });
       },
 
       signOut: () => set({ currentUserId: null }),

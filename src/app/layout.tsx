@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { IBM_Plex_Mono, Instrument_Serif, Plus_Jakarta_Sans } from "next/font/google";
+import { googleSignInEnabled } from "@/lib/auth-config";
 import { site } from "@/lib/site";
 import { StoreHydrator } from "@/lib/store/hydrator";
 import "./globals.css";
@@ -46,7 +47,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`${display.variable} ${sans.variable} ${mono.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col">
-        <StoreHydrator />
+        <StoreHydrator googleSignIn={googleSignInEnabled} />
         {children}
       </body>
     </html>

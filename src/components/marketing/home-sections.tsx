@@ -46,9 +46,9 @@ export function TrustStrip() {
   ];
   return (
     <section className="border-b border-line bg-white">
-      <Container className="grid grid-cols-2 gap-x-6 gap-y-6 py-8 lg:grid-cols-4">
+      <Container className="grid grid-cols-2 items-center gap-x-6 gap-y-6 py-8 lg:grid-cols-4">
         {items.map((i) => (
-          <div key={i.t} className="flex items-start gap-3">
+          <div key={i.t} className="flex items-center gap-3">
             <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#eaf1fc] text-caliper">
               {i.icon === GraduationCap ? <VanderbiltMark className="h-[18px] w-auto" /> : <i.icon className="h-5 w-5" />}
             </span>
@@ -293,10 +293,11 @@ export function CertificateBand() {
           <ButtonLink href="/verify" variant="secondary" className="mt-8" iconRight={<ArrowRight className="h-4 w-4" />}>Verify a certificate</ButtonLink>
         </Reveal>
         <Reveal delay={0.08}>
-          <Certificate
-            data={{ id: "SVR-7KQ2-M9XD", recipientName: "Jordan A. Example, FNP-C", courseTitle: "eFAST: Trauma Ultrasound", courseCode: "SVR-110", ceHours: 5.5, issuedAt: "2026-10-12T00:00:00.000Z" }}
-            className="rotate-[-1deg]"
-          />
+          <div className="rotate-[-1deg] rounded-md transition-[transform,box-shadow] duration-500 ease-out hover:-translate-y-1 hover:rotate-0 hover:shadow-[0_0_0_1px_rgba(214,180,106,0.5),0_0_44px_4px_rgba(53,163,222,0.22)]">
+            <Certificate
+              data={{ id: "SVR-7KQ2-M9XD", recipientName: "Jordan A. Example, FNP-C", courseTitle: "eFAST: Trauma Ultrasound", courseCode: "SVR-110", ceHours: 5.5, issuedAt: "2026-10-12T00:00:00.000Z" }}
+            />
+          </div>
         </Reveal>
       </Container>
     </section>
