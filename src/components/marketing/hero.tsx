@@ -49,8 +49,8 @@ export function Hero() {
             Point-of-care ultrasound and emergency imaging courses
           </motion.h1>
           <motion.p {...rise(0.16)} className="mt-5 text-[17px] leading-relaxed text-bone-dim">
-            Self-paced online training for NPs, PAs and physicians. Built over {site.provenance.years} years by a Vanderbilt
-            nursing professor and used in Vanderbilt&apos;s advanced practice program.
+            Self-paced online training for NPs, PAs and physicians, built over {site.provenance.years} years from the 40-hour
+            ultrasound course Dr. Susanna Rudy teaches in Vanderbilt&apos;s advanced practice program.
           </motion.p>
           <motion.div {...rise(0.24)} className="mt-8 flex flex-wrap gap-3">
             <ButtonLink href="/courses" size="lg" iconRight={<ArrowRight className="h-4 w-4" />}>

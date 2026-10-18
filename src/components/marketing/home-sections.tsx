@@ -39,7 +39,7 @@ function SectionTitle({ title, sub, action }: { title: string; sub?: string; act
 
 export function TrustStrip() {
   const items = [
-    { icon: GraduationCap, t: "Vanderbilt-developed", d: "Created by a School of Nursing professor" },
+    { icon: GraduationCap, t: "Vanderbilt-developed", d: "Created by School of Nursing faculty" },
     { icon: CalendarClock, t: `${site.provenance.years} years in development`, d: "Recorded, taught and refined" },
     { icon: BadgeCheck, t: "Exam + certificate", d: "Verifiable by employers" },
     { icon: MonitorPlay, t: "Self-paced video", d: "Phone, tablet or laptop" },
@@ -335,9 +335,9 @@ export function AuthorCard() {
           <div>
             <div className="text-[13px] font-bold uppercase tracking-[0.1em] text-caliper">Course author</div>
             <h2 className="mt-1 text-[22px] font-bold text-bone">Dr. Susanna Rudy, DNP</h2>
-            <p className="mt-1 text-[14px] text-mute">Emergency, family &amp; acute care nurse practitioner · Vanderbilt University School of Nursing</p>
+            <p className="mt-1 text-[14px] text-mute">Instructor of Nursing · Vanderbilt University School of Nursing</p>
             <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-bone-dim">
-              30+ years in emergency and critical care. Built Vanderbilt&apos;s point-of-care ultrasound course for advanced practice providers and teaches national ultrasound workshops.
+              Board-certified emergency, family and acute care nurse practitioner with 30+ years in emergency and critical care. She created Vanderbilt&apos;s 14-week point-of-care ultrasound course for advanced practice providers and teaches national ultrasound workshops.
             </p>
           </div>
           <ButtonLink href="/about" variant="secondary" iconRight={<ArrowRight className="h-4 w-4" />}>Full bio</ButtonLink>

@@ -1,24 +1,24 @@
 /* eslint-disable @next/next/no-img-element */
 import type { Metadata } from "next";
-import { ArrowRight, Award, BookOpenText, GraduationCap, Presentation } from "lucide-react";
+import { ArrowRight, Award, BookOpenText, Globe2, GraduationCap, Presentation } from "lucide-react";
 import { ButtonLink } from "@/components/ui/button";
 import { Container } from "@/components/ui/primitives";
 import { site } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "About the course author",
-  description: "Dr. Susanna Rudy, DNP: emergency nurse practitioner and Vanderbilt University School of Nursing professor.",
+  description: "Dr. Susanna Rudy, DNP: emergency nurse practitioner and Instructor of Nursing at Vanderbilt University School of Nursing.",
 };
 
-const credentials = ["DNP", "MFS", "ENP-C", "FNP-C", "AG-ACNP-BC"];
+const credentials = ["DNP", "MFS", "AG-ACNP", "FNP", "ENP", "CCRN"];
 
 const timeline = [
-  { when: "Early career", body: "Emergency department nurse at a Level I trauma center, then ICU, trauma and flight nursing." },
-  { when: "Education", body: "MSN and DNP from Vanderbilt University; Master of Forensic Science; acute care NP/PA critical care fellowship at Emory University." },
-  { when: "2016", body: "First emergency nurse practitioner in Vanderbilt University Medical Center's emergency department; joined the School of Nursing faculty." },
-  { when: "POCUS", body: "Developed and coordinated Vanderbilt's graduate course, Introduction to Point of Care Ultrasound for the Advanced Practice Provider." },
-  { when: "2021", body: "Part of the team behind an award-winning virtual reality ultrasound training program (Learn X Platinum, Brandon Hall Gold)." },
-  { when: "Today", body: `Three years of recorded teaching, organized into the courses on ${site.name}.` },
+  { when: "Nursing", body: "Began in the emergency department of a Level I trauma center, then more than a decade at UC San Diego Medical Center caring for high-acuity patients across emergency, critical care, flight (Life Flight) and hyperbaric medicine." },
+  { when: "Education", body: "MSN and DNP from Vanderbilt University, Master of Forensic Science, graduate work in humanitarian and disaster medicine, and Emory University's fellowship in critical care advanced practice nursing." },
+  { when: "2016", body: "Joined Vanderbilt University School of Nursing faculty in the Emergency Nurse Practitioner program, and became the first emergency nurse practitioner in Vanderbilt University Medical Center's emergency department." },
+  { when: "2017", body: "Became Instructor of Point of Care Ultrasound and created Introduction to Point of Care Ultrasound for the Advanced Practice Provider: a 14-week course with 40 hours of hands-on and didactic training." },
+  { when: "2021", body: "Her work using virtual reality in ultrasound education received international awards: Learn X Platinum, Brandon Hall Group Gold, and a Learning Technologies shortlist." },
+  { when: "Today", body: `Still practicing as an emergency and acute care nurse practitioner, and turning three years of recorded teaching into the courses on ${site.name}.` },
 ];
 
 export default function AboutPage() {
@@ -26,11 +26,11 @@ export default function AboutPage() {
     <>
       <section className="border-b border-line bg-ink-950">
         <Container className="grid items-center gap-10 py-12 sm:py-16 lg:grid-cols-[320px_1fr] lg:gap-14">
-          <img src="/images/people/susanna-rudy-placeholder.jpg" alt="Dr. Susanna Rudy" className="mx-auto aspect-[4/5] w-full max-w-[320px] rounded-xl object-cover object-top shadow-sm" />
+          <img src="/images/people/susanna-rudy-portrait.jpg" alt="Dr. Susanna Rudy" className="mx-auto aspect-square w-full max-w-[320px] rounded-xl object-cover shadow-sm" />
           <div>
             <div className="text-[13px] font-bold uppercase tracking-[0.1em] text-caliper">Course author</div>
             <h1 className="mt-2 text-[clamp(2rem,4.5vw,3rem)] font-bold leading-tight tracking-[-0.025em] text-bone">Dr. Susanna Rudy, DNP</h1>
-            <p className="mt-2 text-[16px] text-mute">Emergency nurse practitioner · Vanderbilt University School of Nursing</p>
+            <p className="mt-2 text-[16px] text-mute">Emergency nurse practitioner · Instructor of Nursing, Vanderbilt University School of Nursing</p>
             <div className="mt-4 flex flex-wrap gap-2">
               {credentials.map((c) => (
                 <span key={c} className="rounded-md border border-line-strong bg-white px-2.5 py-1 text-[13px] font-semibold text-bone-dim">{c}</span>
@@ -38,8 +38,9 @@ export default function AboutPage() {
             </div>
             <p className="mt-6 max-w-2xl text-[16.5px] leading-relaxed text-bone-dim">
               Board-certified as an emergency, family and adult-gerontology acute care nurse practitioner, with more than
-              30 years in emergency departments, ICUs, trauma bays and flight crews. She built the point-of-care ultrasound
-              curriculum taught to advanced practice students at Vanderbilt, and these courses are that curriculum.
+              30 years in emergency departments, critical care, flight and disaster response, and she still practices
+              clinically. She created the point-of-care ultrasound course taught to advanced practice students at
+              Vanderbilt, and these courses are built from it.
             </p>
             <ButtonLink href="/courses" size="lg" className="mt-7" iconRight={<ArrowRight className="h-4 w-4" />}>Browse her courses</ButtonLink>
           </div>
@@ -63,10 +64,11 @@ export default function AboutPage() {
           <div className="space-y-4">
             <h2 className="text-[24px] font-bold tracking-[-0.02em] text-bone">Teaching &amp; recognition</h2>
             {[
-              { icon: GraduationCap, t: "Vanderbilt University School of Nursing", d: "Faculty; developed the graduate POCUS course for advanced practice providers." },
-              { icon: Presentation, t: "National workshop faculty", d: "Ultrasound workshops for AAENP and AANP; ultrasound education committees for AAENP and SCCM." },
+              { icon: GraduationCap, t: "Vanderbilt University School of Nursing", d: "Instructor of Nursing; created and coordinates the 14-week, 40-hour POCUS course for advanced practice providers." },
+              { icon: Presentation, t: "National workshop faculty", d: "Ultrasound lectures and workshops for AAENP and AANP; ultrasound education committees for AAENP and the Society of Critical Care Medicine, where she is junior faculty." },
               { icon: Award, t: "VR ultrasound education awards (2021)", d: "Learn X Awards Platinum; Brandon Hall Group Gold; Learning Technologies Awards shortlist." },
               { icon: BookOpenText, t: "Published", d: "Ultrasound Education for Nurse Practitioner Students, The Journal for Nurse Practitioners (2024)." },
+              { icon: Globe2, t: "Humanitarian & disaster medicine", d: "Medical and teaching missions to Indonesia, Honduras, Lithuania and Latvia, two tours aboard the Mercy hospital ship, and service on a Disaster Medical Assistance Team." },
             ].map((i) => (
               <div key={i.t} className="flex gap-3 rounded-lg border border-line bg-white p-4">
                 <i.icon className="mt-0.5 h-5 w-5 shrink-0 text-caliper" />

@@ -5,7 +5,7 @@
 export const site = {
   name: "Sonosus VR Education",
   shortName: "Sonosus VR",
-    domain: "sonosusvr.org",
+  domain: "sonosusvr.org",
   url: "https://sonosusvr.org",
   tagline: "Bedside imaging education for advanced practice providers.",
   description:
@@ -13,7 +13,7 @@ export const site = {
   instructor: {
     name: "Susanna Rudy",
     display: "Dr. Susanna Rudy",
-    credentials: "DNP, MFS, AG-ACNP, FNP, ENP",
+    credentials: "DNP, MFS, AG-ACNP, FNP, ENP, CCRN",
     title: "Emergency Nurse Practitioner & POCUS Educator",
   },
   copyrightYear: 2026,
@@ -23,8 +23,8 @@ export const site = {
    * marketing needs the university's permission.
    */
   provenance: {
-    short: "Developed by a Vanderbilt University School of Nursing professor",
-    long: "Developed over three years by Dr. Susanna Rudy, a Vanderbilt University School of Nursing professor, and used to teach point-of-care ultrasound in Vanderbilt's advanced practice program.",
+    short: "Developed by Vanderbilt University School of Nursing faculty",
+    long: "Developed over three years by Dr. Susanna Rudy, Instructor of Nursing at Vanderbilt University School of Nursing, from the 14-week, 40-hour point-of-care ultrasound course she created and teaches for Vanderbilt's advanced practice students.",
     years: 3,
   },
   /**
