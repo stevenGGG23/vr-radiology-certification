@@ -237,9 +237,9 @@ for 30 days, and the site restores the account from it on every visit.
 
 ## Demo walkthrough
 
-- **Draft tools** (footer, phone menu and Studio sidebar): sign in as a sample student, open the Studio as
-  Dr. Rudy, or reset all demo data.
-- **Studio login:** `susanna@sonosusvr.org` with any password.
+- **Studio login:** "Continue with Google" with an account listed in `ADMIN_EMAILS`, or the draft login
+  `susanna@sonosusvr.org` with any password.
+- **Draft tools** (bottom of the Studio sidebar): preview the site as a sample student, or reset all demo data.
 - **Promo code:** `RUDY10` (10% off).
 - **Verify page:** try `SVR-DEMO-1038`, or the ID on any certificate you earn.
 - In a lesson, "Draft tool: mark all lessons complete" unlocks the exam quickly.

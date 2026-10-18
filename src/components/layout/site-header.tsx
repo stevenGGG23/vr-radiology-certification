@@ -8,7 +8,6 @@ import {
   ArrowRight, ChevronDown, LayoutDashboard, LogOut, Menu, Search, Settings, ShieldCheck, ShoppingBag, Trash2, UserRound, X,
 } from "lucide-react";
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { DemoToolbar } from "@/components/layout/demo-toolbar";
 import { Logo } from "@/components/ui/brand";
 import { ButtonLink } from "@/components/ui/button";
 import { cn } from "@/lib/cn";
@@ -439,11 +438,6 @@ export function SiteHeader() {
                 )}
               </div>
               <p className="mt-8 text-[12.5px] leading-relaxed text-faint">{site.provenance.short}.</p>
-              {site.demoMode && (
-                <div className="mt-6">
-                  <DemoToolbar inline />
-                </div>
-              )}
             </nav>
           </motion.div>
         )}

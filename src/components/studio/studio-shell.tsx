@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { BookOpen, ExternalLink, LayoutDashboard, LogOut, Menu, Settings, UsersRound, X } from "lucide-react";
 import { Suspense, useState, type ReactNode } from "react";
 import { RequireAuth } from "@/components/auth/require-auth";
-import { DemoToolbar } from "@/components/layout/demo-toolbar";
+import { DraftTools } from "./draft-tools";
 import { LogoMark } from "@/components/ui/brand";
 import { cn } from "@/lib/cn";
 import { signOutEverywhere } from "@/lib/auth-client";
@@ -78,7 +78,7 @@ function Sidebar({ onPick }: { onPick?: () => void }) {
         {site.demoMode && (
           <div className="px-1 pt-3">
             <Suspense>
-              <DemoToolbar inline />
+              <DraftTools />
             </Suspense>
           </div>
         )}

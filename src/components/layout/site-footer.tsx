@@ -2,7 +2,6 @@ import Link from "next/link";
 import { Logo } from "@/components/ui/brand";
 import { Container } from "@/components/ui/primitives";
 import { site } from "@/lib/site";
-import { DemoToolbar } from "./demo-toolbar";
 import { NewsletterForm } from "./newsletter-form";
 
 const columns = [
@@ -82,7 +81,6 @@ export function SiteFooter() {
             <Link href="/legal/refunds" className="hover:text-bone">Refund policy</Link>
             <Link href="/legal/accessibility" className="hover:text-bone">Accessibility</Link>
             <Link href="/legal/image-credits" className="hover:text-bone">Image credits</Link>
-            {site.demoMode && <DemoToolbar inline />}
           </div>
         </Container>
       </div>
