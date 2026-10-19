@@ -24,8 +24,16 @@ const mono = IBM_Plex_Mono({
   weight: ["400", "500"],
 });
 
+/*
+  Link previews need absolute URLs. SITE_URL wins if set; on Vercel it's the
+  live production domain (the vercel.app address until sonosusvr.org is
+  connected); otherwise the planned domain.
+*/
+const siteUrl =
+  process.env.SITE_URL ?? (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : site.url);
+
 export const metadata: Metadata = {
-  metadataBase: new URL(site.url),
+  metadataBase: new URL(siteUrl),
   title: {
     default: `${site.name}: Point-of-care ultrasound & imaging courses`,
     template: `%s · ${site.name}`,
@@ -36,7 +44,10 @@ export const metadata: Metadata = {
     description: site.description,
     type: "website",
     siteName: site.name,
+    locale: "en_US",
   },
+  twitter: { card: "summary_large_image", title: site.name, description: site.description },
+  appleWebApp: { title: site.shortName },
 };
 
 export const viewport: Viewport = {

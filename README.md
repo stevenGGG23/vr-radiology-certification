@@ -26,23 +26,24 @@ from an admin Studio.
 6. [Configuration](#configuration)
 7. [Google sign-in setup](#google-sign-in-setup)
 8. [Payments: cards, Apple Pay and Google Pay](#payments-cards-apple-pay-and-google-pay)
-9. [Video security and watch rules](#video-security-and-watch-rules)
-10. [Transactional email](#transactional-email)
-11. [Professional readiness review](#professional-readiness-review)
-12. [Caching, cookies and performance](#caching-cookies-and-performance)
-13. [Demo walkthrough](#demo-walkthrough)
-14. [Domains and deployment](#domains-and-deployment)
-15. [Roadmap](#roadmap)
-16. [Recommended services](#recommended-services)
-17. [Production checklist](#production-checklist)
-18. [Credits](#credits)
+9. [Link previews](#link-previews)
+10. [Video security and watch rules](#video-security-and-watch-rules)
+11. [Transactional email](#transactional-email)
+12. [Professional readiness review](#professional-readiness-review)
+13. [Caching, cookies and performance](#caching-cookies-and-performance)
+14. [Demo walkthrough](#demo-walkthrough)
+15. [Domains and deployment](#domains-and-deployment)
+16. [Roadmap](#roadmap)
+17. [Recommended services](#recommended-services)
+18. [Production checklist](#production-checklist)
+19. [Credits](#credits)
 
 ## Project status
 
 | Area | Status | Notes |
 | --- | --- | --- |
 | Storefront, catalog and course pages | Built | Placeholder courses, prices and lessons |
-| Cart and checkout | Built | Card, Apple Pay and Google Pay buttons; payment is simulated |
+| Cart and checkout | Built | Review, payment and confirmation steps; Apple Pay, Google Pay and card; payment is simulated |
 | Lesson player and paywall | Built | Access is enforced in the browser only |
 | Watch rules | Built | No skipping ahead on the first viewing, any speed, completes only at the end; checked in the browser only |
 | Exams and certificates | Built | Graded in the browser; certificates are pass/fail |
@@ -50,6 +51,7 @@ from an admin Studio.
 | Admin Studio | Built | Courses, students, refunds, email previews; saved in the editor's browser only |
 | Google sign-in | Live | Credentials configured in Vercel |
 | Transactional email | Designed | Six templates and their triggers; recorded in Studio, not yet delivered |
+| Link previews | Built | Branded share cards for both domains and an iPhone app icon |
 | Security headers | Built | Baseline headers on every response; full Content Security Policy pending |
 | Legal pages | Drafted | Privacy, Terms, Refunds, Accessibility; attorney review pending |
 | sonosusvr.com landing page | Built | "Coming soon" page for Virtual Response On Call |
@@ -151,14 +153,14 @@ sequenceDiagram
   participant D as Database
   participant E as Email
 
-  L->>S: Checks out cart
-  S->>P: Create Checkout Session
-  P-->>L: Payment page (card, Apple Pay, Google Pay)
-  L->>P: Pays
+  L->>S: Reviews order, continues to payment
+  S->>P: Create PaymentIntent (prices from the database)
+  P-->>L: Payment fields on /checkout/pay (card, Apple Pay, Google Pay)
+  L->>P: Confirms in the wallet sheet, or submits the card
   P-->>S: Webhook: checkout.session.completed
   S->>D: Record order, create enrollments
   S->>E: Send receipt
-  S-->>L: Courses unlocked in My Courses
+  S-->>L: Confirmation page; courses unlocked in My Courses
 ```
 
 ### Lesson playback (target)
@@ -199,12 +201,13 @@ sequenceDiagram
 ```text
 src/
   app/
-    (site)/            Storefront: home, catalog, course pages, checkout, dashboard, legal
+    (site)/            Storefront: home, catalog, course pages, checkout (review, pay, success), dashboard, legal
     (auth)/            Sign in, sign up, Google sign-in completion
     (focus)/           Lesson player, exam, certificate (distraction-free layout)
     (oncall)/on-call/  Landing page served on sonosusvr.com
     studio/            Admin Studio: overview, courses, students, emails, settings
     api/auth/          Auth.js route handler (Google sign-in)
+    opengraph-image    Link-preview card; apple-icon makes the iPhone icon
   auth.ts              Auth.js configuration
   components/
     learn/             Lesson player; protected-video.tsx holds the watch rules
@@ -212,11 +215,14 @@ src/
     ...                marketing, course, certificate, layout, ui
   lib/
     email/templates.ts Every automatic email: content, triggers, HTML and text rendering
+    share-card.tsx     Design for link-preview cards and the app icon
     site.ts            Brand name, domains, provenance wording, demo flag
     seed/              Placeholder course catalog and demo records
     store/             Draft data stores (catalog, session, cart)
     types.ts           Domain model; maps one-to-one onto future database tables
     image-credits.ts   Licenses for every third-party image and video
+assets/
+  fonts/               Plus Jakarta Sans for the preview cards (SIL Open Font License)
 public/
   images/              Course art, photos, headshots, brand marks
   videos/              Sample ultrasound clips (CC BY 2.0)
@@ -245,6 +251,7 @@ in `.env.local` (never commit it).
 | `AUTH_SECRET` | For Google sign-in | Encrypts session cookies. Generate with `openssl rand -base64 32` |
 | `AUTH_GOOGLE_ID` | For Google sign-in | OAuth client ID from Google Cloud |
 | `AUTH_GOOGLE_SECRET` | For Google sign-in | OAuth client secret from Google Cloud |
+| `SITE_URL` | No | Absolute address used in link previews. Defaults to the live Vercel production domain |
 | `ADMIN_EMAILS` | No | Comma-separated emails that open the Studio, for example Dr. Rudy's |
 | `AUTH_TRUST_HOST` | Outside Vercel only | Set to `true` when self-hosting or running `next start` locally |
 
@@ -268,30 +275,80 @@ out, because it needs a paid Apple Developer membership ($99 per year) and a key
 
 ## Payments: cards, Apple Pay and Google Pay
 
-The checkout shows one wallet button (Apple Pay on Apple devices with Apple Pay set up, Google Pay in Chrome
-and on Android) above the card button. In the draft, every option completes a simulated order and records the
-payment method on it, so receipts and refunds show "Paid with Apple Pay".
+### Checkout steps
 
-To go live with [Stripe](https://stripe.com):
+Buying always takes deliberate steps, so nobody is charged by a stray click:
+
+| Step | Page | What happens |
+| --- | --- | --- |
+| 1. Review | `/checkout` | Items, promo code and the name for certificates. "Continue to payment" charges nothing. |
+| 2. Payment | `/checkout/pay` | Apple Pay, Google Pay or a card form, plus "Back to your order". Wallet buttons open the wallet's own confirmation sheet; the card form has to be filled in and submitted. |
+| 3. Confirmation | `/checkout/success` | Order details, payment method and a link to start learning; the receipt email goes out. |
+
+"Buy it now" on a course page adds the course and opens step 1. In the draft, step 2 stands in for Stripe:
+the wallet sheet is simulated, any valid test card works (for example `4242 4242 4242 4242` with any future
+date), and nothing is charged. The draft turns off browser card autofill so no one types in a real card.
+
+### Which wallet buttons appear
+
+Both buttons appear on every device that can use them:
+
+| Wallet | Works on | Hidden on |
+| --- | --- | --- |
+| Apple Pay | Safari on iPhone, iPad and Mac; other browsers by scanning a code with an iPhone on iOS 18 or later | Android phones. Through Stripe, desktop Chrome and Edge show it on Macs only for now, so Windows computers may not see it at launch |
+| Google Pay | Chrome, Safari, Edge, Firefox and other major browsers, on desktop and mobile | Nowhere |
+
+A learner who hasn't set up a wallet yet is walked through signing in or adding a card when they tap it.
+
+### Going live with Stripe
+
+Yes, this is the same flow customers get with Stripe: the review step stays as it is, and the payment step
+hosts Stripe's own fields.
 
 1. Create the Stripe account in the business's name, finish identity and bank verification, and turn on
    **Apple Pay** and **Google Pay** under **Settings > Payment methods**.
-2. Choose the checkout style:
-   - **Stripe-hosted Checkout (recommended to start).** The site creates a Checkout Session and redirects to
-     Stripe's page, which already shows Apple Pay and Google Pay when the device supports them.
-   - **Embedded on sonosusvr.org** (Express Checkout Element, as in the draft layout). Register every domain
-     that shows the buttons under **Settings > Payment method domains**, in live mode before launch. Stripe
-     handles Apple's merchant validation, so no Apple Merchant ID is needed.
-3. Add `/api/checkout` (creates the session from the cart, with the learner ID in metadata) and
-   `/api/stripe/webhook` (verifies the signature, then records orders, enrollments and emails). Process each
-   event ID once, because Stripe can deliver the same event more than once.
-4. Refunds from the Studio call Stripe's refund API; access is removed when the `charge.refunded` webhook
+2. On `/checkout/pay`, replace the draft buttons and card form with Stripe's **Express Checkout Element**
+   (wallets) and **Payment Element** (card). Set `paymentMethods: { applePay: "always", googlePay: "always" }`
+   on the Express Checkout Element. Without `"always"`, Stripe hides a wallet when it guesses the learner won't
+   use it, and Apple Pay in desktop Chrome and Google Pay in Firefox don't appear at all.
+3. Register every domain that shows the buttons (`sonosusvr.org` and the vercel.app preview) under
+   **Settings > Payment method domains**, in live mode before launch. Stripe handles Apple's merchant
+   validation, so no Apple Merchant ID is needed.
+4. Add `/api/checkout` (creates a PaymentIntent from the cart on the server, with the learner ID in
+   metadata; prices always come from the database, never the browser) and `/api/stripe/webhook` (verifies the
+   signature, then records orders, enrollments and the receipt email). Process each event ID once, because
+   Stripe can deliver the same event more than once.
+5. Stripe returns the learner to `/checkout/success`, which shows the order once the webhook has recorded it.
+6. Refunds from the Studio call Stripe's refund API; access is removed when the `charge.refunded` webhook
    arrives, not before.
-5. Turn on **Stripe Tax** or confirm with an accountant whether online courses are taxable in each state
+7. Turn on **Stripe Tax** or confirm with an accountant whether online courses are taxable in each state
    where learners buy.
+
+Stripe's hosted Checkout page is a simpler alternative (redirect to `checkout.stripe.com`), but Stripe then
+decides when to show each wallet, so Apple Pay and Google Pay would not appear everywhere.
 
 `next.config.ts` already allows the browser payment feature for Stripe's frames
 (`Permissions-Policy: payment=(self "https://js.stripe.com")`).
+
+## Link previews
+
+When a link to the site is shared in Messages, email, Slack, LinkedIn or social media, the preview shows a
+branded card: the Sonosus mark and name on navy, the course tagline, Dr. Rudy's name and the domain.
+`sonosusvr.com` gets its own "Virtual Response On Call" card, and iPhones get a matching home-screen icon.
+
+| File | What it makes |
+| --- | --- |
+| `src/app/opengraph-image.tsx` | Preview card for every page of the education site |
+| `src/app/(oncall)/on-call/opengraph-image.tsx` | Preview card for sonosusvr.com |
+| `src/app/apple-icon.tsx` | 180 by 180 app icon |
+| `src/lib/share-card.tsx` | Shared design for all three; fonts are in `assets/fonts` (SIL Open Font License) |
+
+The cards are drawn at build time from code, so changing the wording or swapping in the final logo is a
+one-file edit. Preview links must be absolute: on Vercel they use the live production domain automatically
+(the vercel.app address until `sonosusvr.org` is connected). Set `SITE_URL` to override it.
+
+Apps cache previews, so a link shared before a change keeps its old preview for a while. To check a new one,
+paste the link into [opengraph.xyz](https://www.opengraph.xyz) or share it with `?v=2` added.
 
 ## Video security and watch rules
 
@@ -425,6 +482,7 @@ Redis, a service worker or a separate CDN would add cost and failure points with
 - **Studio login:** "Continue with Google" with an account listed in `ADMIN_EMAILS`, or the draft login
   `susanna@sonosusvr.org` with any password.
 - **Draft tools** (bottom of the Studio sidebar): preview the site as a sample student, or reset all demo data.
+- **Checkout:** "Buy it now" opens the review step; "Continue to payment" opens the payment step. Tap Apple Pay or Google Pay to see the confirmation sheet, or use "Use a test card".
 - **Promo code:** `RUDY10` (10% off).
 - **Watch rules:** enroll in Lung & Pleural Ultrasound and open "The bat sign and the pleural line" (a
   10-second sample). Try to skip ahead, change the speed, then let it finish.
@@ -519,6 +577,7 @@ Work through these in order of the headings. Items marked **(Dr. Rudy)** need he
 
 - [ ] Connect `sonosusvr.org` (primary) and `sonosusvr.com` in Vercel; add the records at GoDaddy
 - [ ] Redirect `www` to the bare domain; confirm HTTPS certificates are issued
+- [ ] Set `SITE_URL=https://sonosusvr.org` in Vercel so previews never point at sonosusvr.com
 - [ ] Email records: SPF, DKIM and DMARC for the sending domain
 - [ ] Lock both domains at GoDaddy and turn on auto-renew
 
@@ -538,10 +597,11 @@ Work through these in order of the headings. Items marked **(Dr. Rudy)** need he
 
 ### Payments
 
+- [ ] Stripe Express Checkout Element (`applePay` and `googlePay` set to `"always"`) and Payment Element on `/checkout/pay`
 - [ ] `/api/checkout` and a signature-verified `/api/stripe/webhook`, processing each event once
 - [ ] Enrollments and receipts created only by the webhook
 - [ ] Refunds from the Studio through Stripe; access removed on `charge.refunded`; disputes handled
-- [ ] Payment method domains registered (if using the embedded checkout)
+- [ ] Payment method domains registered for `sonosusvr.org` and the vercel.app address
 - [ ] Test in Stripe's sandbox with cards, Apple Pay and Google Pay, then switch to live keys
 
 ### Video
@@ -582,7 +642,8 @@ Work through these in order of the headings. Items marked **(Dr. Rudy)** need he
 - [ ] Cross-browser pass: Safari on iPhone and Mac, Chrome on Android and desktop, Edge, Firefox
 - [ ] Full journey test on production: sign up, pay, watch, fail and pass the exam, certificate, verify, refund
 - [ ] Error tracking (Sentry) and uptime alerts
-- [ ] `Course` structured data and share images per course
+- [ ] `Course` structured data, and per-course preview cards if wanted
+- [ ] Check link previews for both domains after the DNS cutover (opengraph.xyz, iMessage, LinkedIn)
 - [ ] Set `NEXT_PUBLIC_DEMO_MODE=false` and remove demo seed data
 - [ ] Support process: who answers, response time, refund decisions
 - [ ] After launch: review refunds, failed payments, email bounces and error alerts weekly
