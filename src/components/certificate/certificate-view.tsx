@@ -29,7 +29,9 @@ export function CertificateView({ id }: { id: string }) {
   }
 
   return (
-    <div className="min-h-[100svh]">
+    <div className="min-h-[100svh] print:min-h-0">
+      {/* Landscape sheet, set only while this page is open so other pages print normally. */}
+      <style>{"@page { size: landscape; margin: 0.4in; }"}</style>
       <header className="no-print sticky top-0 z-30 border-b border-line bg-void/85 backdrop-blur-xl">
         <div className="mx-auto flex h-14 max-w-[1240px] items-center gap-3 px-4 sm:px-8">
           <Logo compact />
@@ -56,8 +58,8 @@ export function CertificateView({ id }: { id: string }) {
           </div>
         </div>
       </header>
-      <Container className="max-w-5xl py-10 sm:py-16 print:max-w-[9.6in] print:p-0 print:[page:certificate]">
-        <Certificate data={cert} accreditation={`${statement.split(".")[0]}.`} className="print:w-full" />
+      <Container className="max-w-5xl py-10 sm:py-16 print:max-w-[9.6in] print:p-0">
+        <Certificate data={cert} accreditation={`${statement.split(".")[0]}.`} className="print:w-full print:break-inside-avoid" />
         <p className="no-print mt-6 text-center text-[13px] text-faint">
           Anyone can verify this certificate at {site.domain}/verify with ID <span className="font-mono text-bone-dim">{cert.id}</span>.
         </p>
