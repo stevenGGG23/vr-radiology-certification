@@ -63,13 +63,7 @@ function Sidebar({ onPick }: { onPick?: () => void }) {
           <ExternalLink className="h-4 w-4" /> View live site
         </Link>
         <button
-          onClick={() => {
-            // Full reload afterwards so no admin state lingers in memory.
-            signOutEverywhere().finally(() => {
-              // eslint-disable-next-line @next/next/no-location-assign-relative-destination
-              window.location.href = "/";
-            });
-          }}
+          onClick={() => void signOutEverywhere()}
           className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-[13.5px] text-mute hover:text-bone"
         >
           <LogOut className="h-4 w-4" /> Sign out

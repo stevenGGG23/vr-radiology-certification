@@ -248,7 +248,6 @@ export function CartDrawer() {
 
 function AccountButton() {
   const user = useCurrentUser();
-  const router = useRouter();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -298,7 +297,7 @@ function AccountButton() {
             <button
               onClick={() => {
                 setOpen(false);
-                signOutEverywhere().finally(() => router.push("/"));
+                void signOutEverywhere();
               }}
               className="mt-1 flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-[14px] text-[#33445a] hover:bg-[#f5f7fa]"
             >

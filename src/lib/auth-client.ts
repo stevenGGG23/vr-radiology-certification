@@ -13,7 +13,7 @@ export interface GoogleUser {
 }
 
 /** Whether this browser has a Google (Auth.js) session. Not persisted. */
-export const useAuthProvider = create<{ google: boolean }>(() => ({ google: false }));
+export const useAuthProvider = create<{ google: boolean; signingOut: boolean }>(() => ({ google: false, signingOut: false }));
 
 /** Sends the visitor to Google, then back through /auth/complete to `next`. */
 export function signInWithGoogle(next: string) {
@@ -36,11 +36,22 @@ export async function fetchGoogleUser(timeoutMs = 4000): Promise<GoogleUser | nu
   }
 }
 
-/** Signs out of the site and, if present, the Google session too. */
+/** Set on the home page URL after signing out, so it can confirm it. */
+export const SIGNED_OUT_PARAM = "signed-out";
+
+/**
+ * Signs out of the site and, if present, the Google session too. A short
+ * "Signing out" screen covers the switch, then the home page reloads so
+ * nothing from the account stays in memory (learners often share
+ * hospital workstations).
+ */
 export async function signOutEverywhere() {
+  if (useAuthProvider.getState().signingOut) return;
+  useAuthProvider.setState({ signingOut: true });
+  const pause = new Promise((resolve) => setTimeout(resolve, 650));
+  const google = useAuthProvider.getState().google ? signOut({ redirect: false }).catch(() => {}) : null;
+  await Promise.all([pause, google]);
+  // Cleared last, right before leaving, so the current page can't react to it first.
   useSession.getState().signOut();
-  if (useAuthProvider.getState().google) {
-    useAuthProvider.setState({ google: false });
-    await signOut({ redirect: false }).catch(() => {});
-  }
+  window.location.replace(`/?${SIGNED_OUT_PARAM}=1`);
 }

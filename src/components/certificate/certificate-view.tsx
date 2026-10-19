@@ -56,7 +56,7 @@ export function CertificateView({ id }: { id: string }) {
           </div>
         </div>
       </header>
-      <Container className="max-w-5xl py-10 sm:py-16 print:max-w-none print:p-0">
+      <Container className="max-w-5xl py-10 sm:py-16 print:max-w-[9.6in] print:p-0 print:[page:certificate]">
         <Certificate data={cert} accreditation={`${statement.split(".")[0]}.`} className="print:w-full" />
         <p className="no-print mt-6 text-center text-[13px] text-faint">
           Anyone can verify this certificate at {site.domain}/verify with ID <span className="font-mono text-bone-dim">{cert.id}</span>.

@@ -3,6 +3,7 @@ import { IBM_Plex_Mono, Instrument_Serif, Plus_Jakarta_Sans } from "next/font/go
 import { googleSignInEnabled } from "@/lib/auth-config";
 import { site } from "@/lib/site";
 import { StoreHydrator } from "@/lib/store/hydrator";
+import { SignOutFeedback } from "@/components/auth/sign-out-feedback";
 import "./globals.css";
 
 const display = Instrument_Serif({
@@ -49,6 +50,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="flex min-h-full flex-col">
         <StoreHydrator googleSignIn={googleSignInEnabled} />
         {children}
+        <SignOutFeedback />
       </body>
     </html>
   );

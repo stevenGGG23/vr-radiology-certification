@@ -1,4 +1,5 @@
 import { Mrs_Saint_Delafield } from "next/font/google";
+import { useId } from "react";
 import { LogoMark } from "@/components/ui/brand";
 import { cn } from "@/lib/cn";
 import { formatDate } from "@/lib/format";
@@ -36,17 +37,19 @@ function Guilloche() {
   );
 }
 
+/** Holographic seal. Both animations stop in print so the PDF shows a still frame. */
 function Seal() {
+  const ringId = useId();
   return (
     <div className="relative grid aspect-square w-[15cqw] place-items-center">
-      <div className="holo absolute inset-0 rounded-full opacity-90" />
+      <div className="holo absolute inset-0 rounded-full opacity-90 print:animate-none" />
       <div className="absolute inset-[6%] rounded-full bg-paper" />
-      <svg viewBox="0 0 100 100" className="absolute inset-0 h-full w-full animate-[spin_40s_linear_infinite]">
+      <svg viewBox="0 0 100 100" className="absolute inset-0 h-full w-full animate-[spin_40s_linear_infinite] print:animate-none">
         <defs>
-          <path id="seal-ring" d="M50,50 m-36,0 a36,36 0 1,1 72,0 a36,36 0 1,1 -72,0" />
+          <path id={ringId} d="M50,50 m-36,0 a36,36 0 1,1 72,0 a36,36 0 1,1 -72,0" />
         </defs>
         <text fontSize="7.4" letterSpacing="2.4" fill="#16171b" fontFamily="var(--font-plex-mono)">
-          <textPath href="#seal-ring">VERIFIED · SONOSUS VR EDUCATION ·</textPath>
+          <textPath href={`#${ringId}`}>VERIFIED · SONOSUS VR EDUCATION ·</textPath>
         </text>
       </svg>
       <LogoMark className="relative h-[38%] w-[38%] text-paper-ink" />
@@ -58,14 +61,17 @@ export function Certificate({
   data,
   accreditation,
   className,
+  shadow = true,
 }: {
   data: CertificateData;
   accreditation?: string;
   className?: string;
+  /** Built-in drop shadow; turn off when the parent supplies its own. */
+  shadow?: boolean;
 }) {
   return (
-    <div className={cn("@container", className)}>
-      <div className="relative aspect-[1.414/1] w-full overflow-hidden rounded-[0.6cqw] bg-paper text-paper-ink shadow-[0_40px_120px_-30px_rgba(0,0,0,.7)]">
+    <div className={cn("@container [-webkit-print-color-adjust:exact] [print-color-adjust:exact]", className)}>
+      <div className={cn("relative aspect-[1.414/1] w-full overflow-hidden rounded-[0.6cqw] bg-paper text-paper-ink print:shadow-none", shadow && "shadow-[0_40px_120px_-30px_rgba(0,0,0,.7)]")}>
         <div className="absolute inset-[2.2cqw] border border-paper-ink/25" />
         <div className="absolute inset-[2.8cqw] border-[0.25cqw] border-double border-paper-ink/35" />
         <div className="absolute inset-x-[2.8cqw] top-[2.8cqw] h-[5cqw] text-[#b38b2e]/70">

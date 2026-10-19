@@ -67,7 +67,7 @@ export default function AboutPage() {
             </div>
             <p className="mt-3 flex items-center gap-2 text-[14px] font-medium text-bone-dim">
               <ShieldCheck className="h-4 w-4 shrink-0 text-phosphor" />
-              Licensed in 48 states, with the remaining two in progress
+              Licensed in 48 states
             </p>
             <p className="mt-6 max-w-2xl text-[16.5px] leading-relaxed text-bone-dim">
               Board-certified as an emergency, family and adult-gerontology acute care nurse practitioner, with more than

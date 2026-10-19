@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
 import {
-  ArrowRight, Award, BadgeCheck, CalendarClock, Check, ChevronLeft, ChevronRight, Clock3, FileQuestion, GraduationCap, Lock, MonitorPlay,
+  ArrowRight, BadgeCheck, CalendarClock, Check, ChevronLeft, ChevronRight, Clock3, FileQuestion, GraduationCap, Lock, MonitorPlay,
   PlayCircle, RotateCcw, ShieldCheck, Smartphone, Timer, Zap,
 } from "lucide-react";
 import { useState } from "react";
@@ -48,24 +48,28 @@ export function CourseNotFound() {
 
 function Gallery({ course, catalog }: { course: Course; catalog: Course[] }) {
   const [i, setI] = useState(0);
+  const inside = insidePhoto[course.category] ?? insidePhoto.ultrasound;
+  const sampleCertificate = (
+    <Certificate
+      className="w-full"
+      data={{ id: "SVR-SAMPLE-0001", recipientName: "Your Name, Credentials", courseTitle: course.title, courseCode: course.code, ceHours: ceHoursFor(course, catalog), issuedAt: "2026-10-12T00:00:00.000Z" }}
+    />
+  );
   const slides = [
-    { key: "cover", thumb: course.cover, node: <CourseCover course={course} catalog={catalog} priority className="rounded-none" /> },
+    {
+      key: "cover",
+      thumb: <img src={course.cover} alt="" className="aspect-[4/3] w-full object-cover" />,
+      node: <CourseCover course={course} catalog={catalog} priority className="rounded-none" />,
+    },
     {
       key: "inside",
-      thumb: insidePhoto[course.category] ?? insidePhoto.ultrasound,
-      node: <img src={insidePhoto[course.category] ?? insidePhoto.ultrasound} alt="" className="aspect-[4/3] w-full object-cover" />,
+      thumb: <img src={inside} alt="" className="aspect-[4/3] w-full object-cover" />,
+      node: <img src={inside} alt="" className="aspect-[4/3] w-full object-cover" />,
     },
     {
       key: "cert",
-      thumb: null,
-      node: (
-        <div className="grid aspect-[4/3] place-items-center bg-ink-950 p-[6%]">
-          <Certificate
-            className="w-full"
-            data={{ id: "SVR-SAMPLE-0001", recipientName: "Your Name, Credentials", courseTitle: course.title, courseCode: course.code, ceHours: ceHoursFor(course, catalog), issuedAt: "2026-10-12T00:00:00.000Z" }}
-          />
-        </div>
-      ),
+      thumb: <div className="grid aspect-[4/3] place-items-center p-[10%]">{sampleCertificate}</div>,
+      node: <div className="grid aspect-[4/3] place-items-center bg-ink-950 p-[6%]">{sampleCertificate}</div>,
     },
   ];
   const go = (d: number) => setI((x) => (x + d + slides.length) % slides.length);
@@ -92,13 +96,7 @@ function Gallery({ course, catalog }: { course: Course; catalog: Course[] }) {
             aria-label={`Show image ${k + 1}`}
             className={cn("overflow-hidden rounded-md border-2 bg-ink-950", k === i ? "border-[#1a5bd0]" : "border-transparent opacity-75 hover:opacity-100")}
           >
-            {s.thumb ? (
-              <img src={s.thumb} alt="" className="aspect-[4/3] w-full object-cover" />
-            ) : (
-              <div className="grid aspect-[4/3] place-items-center text-[12px] font-semibold text-mute">
-                <Award className="mb-1 h-5 w-5 text-[#b58b33]" /> Certificate
-              </div>
-            )}
+            {s.thumb}
           </button>
         ))}
       </div>

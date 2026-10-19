@@ -293,10 +293,21 @@ export function CertificateBand() {
           <ButtonLink href="/verify" variant="secondary" className="mt-8" iconRight={<ArrowRight className="h-4 w-4" />}>Verify a certificate</ButtonLink>
         </Reveal>
         <Reveal delay={0.08}>
-          <div className="rotate-[-1deg] rounded-md transition-[transform,box-shadow] duration-500 ease-out hover:-translate-y-1 hover:rotate-0 hover:shadow-[0_0_0_1px_rgba(214,180,106,0.5),0_0_44px_4px_rgba(53,163,222,0.22)]">
-            <Certificate
-              data={{ id: "SVR-7KQ2-M9XD", recipientName: "Jordan A. Example, FNP-C", courseTitle: "eFAST: Trauma Ultrasound", courseCode: "SVR-110", ceHours: 5.5, issuedAt: "2026-10-12T00:00:00.000Z" }}
+          <div className="group relative">
+            {/* Halo in the seal's colors, fading in behind the certificate on hover. */}
+            <div
+              aria-hidden
+              className="pointer-events-none absolute -inset-4 scale-95 rounded-[28px] bg-[conic-gradient(from_210deg,rgba(201,154,58,0.6),rgba(53,163,222,0.6),rgba(26,91,208,0.5),rgba(13,138,120,0.5),rgba(201,154,58,0.6))] opacity-0 blur-2xl transition-[opacity,transform] duration-700 ease-out group-hover:scale-100 group-hover:opacity-100"
             />
+            <div className="relative rotate-[-1deg] rounded-[5px] shadow-[0_30px_70px_-30px_rgba(11,31,58,0.45)] transition-[transform,box-shadow] duration-500 ease-out group-hover:-translate-y-1.5 group-hover:rotate-0 group-hover:shadow-[0_0_0_1px_rgba(214,180,106,0.7),0_24px_50px_-28px_rgba(11,31,58,0.4)]">
+              <Certificate
+                shadow={false}
+                data={{ id: "SVR-7KQ2-M9XD", recipientName: "Jordan A. Example, FNP-C", courseTitle: "eFAST: Trauma Ultrasound", courseCode: "SVR-110", ceHours: 5.5, issuedAt: "2026-10-12T00:00:00.000Z" }}
+              />
+              <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden rounded-[5px]">
+                <div className="absolute inset-y-0 left-0 w-1/3 bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.55),transparent)] opacity-0 motion-safe:group-hover:animate-[sheen_1.4s_ease-out_1]" />
+              </div>
+            </div>
           </div>
         </Reveal>
       </Container>
@@ -309,10 +320,15 @@ export function TeamsBand() {
     <section className="py-16 sm:py-20">
       <Container>
         <Reveal className="on-dark relative overflow-hidden rounded-2xl bg-[#0b1f3a]">
+          {/* The photo fades out through a mask (no hard edge), and the glows sit on top so they carry across it. */}
+          <img
+            src="/images/photos/simulation-lab.webp"
+            alt=""
+            className="absolute inset-y-0 right-0 hidden h-full w-[64%] object-cover opacity-90 [mask-image:linear-gradient(90deg,transparent,rgba(0,0,0,0.35)_30%,rgba(0,0,0,0.85)_62%,#000)] lg:block"
+          />
           <div aria-hidden className="pointer-events-none absolute -left-24 -top-24 h-80 w-80 animate-[drift_14s_ease-in-out_infinite] rounded-full bg-[#1a5bd0]/40 blur-3xl" />
           <div aria-hidden className="pointer-events-none absolute -bottom-32 left-1/3 h-72 w-72 animate-[drift_18s_ease-in-out_infinite_reverse] rounded-full bg-[#35a3de]/25 blur-3xl" />
-          <img src="/images/photos/simulation-lab.webp" alt="" className="absolute inset-y-0 right-0 hidden h-full w-1/2 object-cover lg:block" />
-          <div className="absolute inset-y-0 right-0 hidden w-1/2 bg-[linear-gradient(90deg,#0b1f3a,rgba(11,31,58,0))] lg:block" />
+          <div aria-hidden className="pointer-events-none absolute inset-0 hidden bg-[linear-gradient(180deg,rgba(11,31,58,0.15),rgba(11,31,58,0.35))] lg:block" />
           <div className="relative max-w-xl p-8 sm:p-12">
             <h2 className="text-[clamp(1.6rem,3vw,2.2rem)] font-bold leading-tight tracking-[-0.02em] text-white">Training a department or program?</h2>
             <p className="mt-3 text-[16px] leading-relaxed text-bone-dim">Seat-based pricing for 5+ learners, progress reporting and a single invoice.</p>
