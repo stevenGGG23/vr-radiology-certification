@@ -97,6 +97,8 @@ export interface Enrollment {
   expiresAt: string;
   completedLessonIds: string[];
   lastLessonId?: string;
+  /** Furthest point, in seconds, watched in real time for each lesson video. */
+  watchedSeconds?: Record<string, number>;
 }
 
 export interface ExamAttempt {
@@ -122,6 +124,8 @@ export interface Certificate {
   issuedAt: string;
 }
 
+export type PaymentMethod = "card" | "apple_pay" | "google_pay";
+
 export interface Order {
   id: string;
   userId: string;
@@ -129,7 +133,37 @@ export interface Order {
   amountCents: number;
   at: string;
   status: "paid" | "refunded";
+  method?: PaymentMethod;
+  refundedAt?: string;
 }
+
+/** Automatic (transactional) emails. See src/lib/email/templates.ts. */
+export type EmailEvent =
+  | { template: "welcome"; data: { name: string } }
+  | {
+      template: "receipt";
+      data: {
+        name: string;
+        orderIds: string[];
+        items: { title: string; code: string; slug: string; priceCents: number; accessDays: number }[];
+        discountCents: number;
+        totalCents: number;
+        method: PaymentMethod;
+      };
+    }
+  | { template: "refund"; data: { name: string; orderId: string; courseTitle: string; amountCents: number; method: PaymentMethod } }
+  | { template: "access_granted"; data: { name: string; courseTitle: string; slug: string; accessDays: number } }
+  | { template: "access_revoked"; data: { name: string; courseTitle: string } }
+  | { template: "certificate"; data: { name: string; courseTitle: string; courseCode: string; certificateId: string; ceHours: number } };
+
+export type EmailTemplate = EmailEvent["template"];
+
+export type EmailMessage = EmailEvent & {
+  id: string;
+  userId: string;
+  to: string;
+  at: string;
+};
 
 export interface SiteSettings {
   announcement: string;

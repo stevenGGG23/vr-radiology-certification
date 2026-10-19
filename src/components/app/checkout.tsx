@@ -5,17 +5,19 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion } from "motion/react";
 import { ArrowRight, CircleCheck, Loader2, Lock, ShieldCheck, Tag as TagIcon, Trash2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { RequireAuth } from "@/components/auth/require-auth";
+import { AppleIcon, GoogleIcon } from "@/components/ui/brand-icons";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { Container, Skeleton } from "@/components/ui/primitives";
 import { ceHoursFor } from "@/lib/catalog";
+import { cn } from "@/lib/cn";
 import { formatPriceUSD } from "@/lib/format";
 import { site } from "@/lib/site";
 import { useCart } from "@/lib/store/cart";
 import { useCatalog } from "@/lib/store/catalog";
 import { useCurrentUser, useHydration, useSession } from "@/lib/store/session";
-import type { Course } from "@/lib/types";
+import type { Course, PaymentMethod } from "@/lib/types";
 
 const PROMOS: Record<string, number> = { RUDY10: 0.1 };
 
@@ -33,6 +35,57 @@ export function BuyNow({ slug }: { slug: string }) {
   return <Container className="py-24"><Skeleton className="h-64" /></Container>;
 }
 
+type Wallet = "apple_pay" | "google_pay";
+
+/**
+ * Which phone/browser wallet to offer. A rough check for the draft; in
+ * production Stripe's Express Checkout Element decides and renders the
+ * official buttons (Apple Pay on Apple devices, Google Pay in Chrome/Android).
+ */
+function detectWallet(): Wallet | null {
+  try {
+    const aps = (window as { ApplePaySession?: { canMakePayments(): boolean } }).ApplePaySession;
+    if (aps?.canMakePayments()) return "apple_pay";
+  } catch {
+    // Apple Pay throws on non-HTTPS pages.
+  }
+  return "PaymentRequest" in window && /Chrome|CriOS|Android/.test(navigator.userAgent) ? "google_pay" : null;
+}
+const noSubscribe = () => () => {};
+
+function WalletButton({ disabled, busy, onPay }: { disabled: boolean; busy: boolean; onPay: (method: Wallet) => void }) {
+  const wallet = useSyncExternalStore(noSubscribe, detectWallet, () => null);
+  if (!wallet) return null;
+  const label = wallet === "apple_pay" ? "Pay with Apple Pay" : "Pay with Google Pay";
+  return (
+    <>
+      <button
+        type="button"
+        aria-label={label}
+        disabled={disabled}
+        onClick={() => onPay(wallet)}
+        className={cn(
+          "mt-5 flex h-12 w-full items-center justify-center rounded-lg bg-black text-[17px] font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-60",
+          wallet === "apple_pay" && !busy && "apple-pay-button",
+        )}
+      >
+        <span className="flex items-center gap-1.5">
+          {busy ? (
+            <Loader2 className="h-5 w-5 animate-spin" />
+          ) : wallet === "apple_pay" ? (
+            <><AppleIcon className="-mt-1 h-[18px] w-[18px]" /> Pay</>
+          ) : (
+            <><GoogleIcon className="h-[18px] w-[18px]" /> Pay</>
+          )}
+        </span>
+      </button>
+      <div className="mt-4 flex items-center gap-3 text-[12px] font-medium uppercase tracking-[0.1em] text-faint">
+        <span className="h-px flex-1 bg-line" /> or pay by card <span className="h-px flex-1 bg-line" />
+      </div>
+    </>
+  );
+}
+
 export function Checkout() {
   return (
     <RequireAuth>
@@ -47,12 +100,13 @@ function CheckoutInner() {
   const remove = useCart((s) => s.remove);
   const clear = useCart((s) => s.clear);
   const user = useCurrentUser();
-  const purchase = useSession((s) => s.purchase);
+  const placeOrder = useSession((s) => s.placeOrder);
   const enrollments = useSession((s) => s.db.enrollments);
   const [code, setCode] = useState("");
   const [applied, setApplied] = useState<string | null>(null);
   const [codeError, setCodeError] = useState<string>();
   const [stage, setStage] = useState<"review" | "processing" | "done">("review");
+  const [method, setMethod] = useState<PaymentMethod>("card");
   const [bought, setBought] = useState<Course[]>([]);
 
   const items = ids.map((id) => courses.find((c) => c.id === id)).filter((c): c is Course => Boolean(c));
@@ -62,12 +116,13 @@ function CheckoutInner() {
   const discount = applied ? Math.round(subtotal * PROMOS[applied]) : 0;
   const total = subtotal - discount;
 
-  const pay = () => {
+  const pay = (with_: PaymentMethod) => {
+    setMethod(with_);
     setStage("processing");
-    // Production: POST the cart to /api/checkout -> Stripe Checkout Session -> redirect.
-    // Enrollments are created by the Stripe webhook, never by the browser.
+    // Production: POST the cart to /api/checkout -> Stripe (card, Apple Pay or Google Pay).
+    // Enrollments and the receipt email come from the Stripe webhook, never from the browser.
     setTimeout(() => {
-      payable.forEach((c) => purchase(c));
+      placeOrder(payable, { method: with_, discountRate: applied ? PROMOS[applied] : 0 });
       setBought(payable);
       clear();
       setStage("done");
@@ -83,8 +138,9 @@ function CheckoutInner() {
         </motion.div>
         <h1 className="mt-5 text-[32px] font-bold tracking-[-0.02em] text-bone">You&apos;re enrolled.</h1>
         <p className="mt-3 text-[16px] text-mute">
-          {bought.length} {bought.length === 1 ? "item" : "items"} added to your account. A receipt would be emailed to {user?.email}.
+          {bought.length} {bought.length === 1 ? "item" : "items"} added to your account. Your receipt is on its way to {user?.email}.
         </p>
+        {site.demoMode && <p className="mt-2 text-[13px] text-faint">Draft preview: emails are recorded in Studio → Emails instead of being sent.</p>}
         <div className="mt-8 flex flex-wrap justify-center gap-3">
           {first ? (
             <ButtonLink href={`/learn/${first.slug}`} size="lg" iconRight={<ArrowRight className="h-4 w-4" />}>Start learning</ButtonLink>
@@ -159,14 +215,15 @@ function CheckoutInner() {
                 {applied && <div className="flex justify-between text-phosphor"><dt>Code {applied}</dt><dd>−{formatPriceUSD(discount)}</dd></div>}
                 <div className="flex justify-between border-t border-line pt-3 text-[17px] font-bold"><dt className="text-bone">Total</dt><dd className="text-bone">{formatPriceUSD(total)}</dd></div>
               </dl>
+              <WalletButton disabled={stage === "processing" || payable.length === 0} busy={stage === "processing" && method !== "card"} onPay={pay} />
               <Button
                 size="lg"
                 className="mt-5 w-full"
-                onClick={pay}
+                onClick={() => pay("card")}
                 disabled={stage === "processing" || payable.length === 0}
-                iconLeft={stage === "processing" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Lock className="h-4 w-4" />}
+                iconLeft={stage === "processing" && method === "card" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Lock className="h-4 w-4" />}
               >
-                {stage === "processing" ? "Processing…" : `Pay ${formatPriceUSD(total).replace(" USD", "")}`}
+                {stage === "processing" && method === "card" ? "Processing…" : `Pay ${formatPriceUSD(total).replace(" USD", "")} by card`}
               </Button>
               <p className="mt-3 flex items-center justify-center gap-1.5 text-[12.5px] text-faint"><ShieldCheck className="h-3.5 w-3.5" /> Payment is handled by a secure payment processor.</p>
               {site.demoMode && (

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BookOpen, ExternalLink, LayoutDashboard, LogOut, Menu, Settings, UsersRound, X } from "lucide-react";
+import { BookOpen, ExternalLink, LayoutDashboard, LogOut, Mail, Menu, Settings, UsersRound, X } from "lucide-react";
 import { Suspense, useState, type ReactNode } from "react";
 import { RequireAuth } from "@/components/auth/require-auth";
 import { DraftTools } from "./draft-tools";
@@ -16,6 +16,7 @@ const items = [
   { href: "/studio", label: "Overview", icon: LayoutDashboard },
   { href: "/studio/courses", label: "Courses", icon: BookOpen },
   { href: "/studio/students", label: "Students", icon: UsersRound },
+  { href: "/studio/emails", label: "Emails", icon: Mail },
   { href: "/studio/settings", label: "Settings", icon: Settings },
 ];
 

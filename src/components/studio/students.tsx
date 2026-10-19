@@ -1,13 +1,13 @@
 "use client";
 
 import { AnimatePresence, motion } from "motion/react";
-import { BadgeCheck, RotateCcw, Search, UserPlus, X } from "lucide-react";
+import { BadgeCheck, Receipt, RotateCcw, Search, UserPlus, X } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/form";
 import { ProgressBar, Tag } from "@/components/ui/primitives";
 import { progressFor } from "@/lib/catalog";
-import { formatDate, initials } from "@/lib/format";
+import { formatDate, formatPriceUSD, initials } from "@/lib/format";
 import { useCatalog } from "@/lib/store/catalog";
 import { useSession } from "@/lib/store/session";
 import { StudioHeader } from "./studio-shell";
@@ -17,6 +17,7 @@ export function StudioStudents() {
   const grant = useSession((s) => s.grantAccess);
   const revoke = useSession((s) => s.revokeAccess);
   const resetAttempts = useSession((s) => s.resetAttempts);
+  const refund = useSession((s) => s.refundOrder);
   const courses = useCatalog((s) => s.courses);
   const [q, setQ] = useState("");
   const [selected, setSelected] = useState<string | null>(null);
@@ -101,7 +102,13 @@ export function StudioStudents() {
                     <option value="">Choose a course…</option>
                     {singleCourses.filter((c) => !db.enrollments.some((e) => e.userId === user.id && e.courseId === c.id)).map((c) => <option key={c.id} value={c.id}>{c.title}</option>)}
                   </Select>
-                  <Button disabled={!grantId} onClick={() => { grant(user.id, grantId); setGrantId(""); }} iconLeft={<UserPlus className="h-4 w-4" />}>Grant</Button>
+                  <Button
+                    disabled={!grantId}
+                    onClick={() => {
+                      const course = courses.find((c) => c.id === grantId);
+                      if (course) grant(user.id, course);
+                      setGrantId("");
+                    }} iconLeft={<UserPlus className="h-4 w-4" />}>Grant</Button>
                 </div>
               </div>
 
@@ -133,13 +140,43 @@ export function StudioStudents() {
                               <RotateCcw className="h-3.5 w-3.5" /> Reset attempts
                             </button>
                           )}
-                          <button onClick={() => revoke(user.id, c.id)} className="rounded-md px-2 py-1 text-faint hover:bg-doppler-red/10 hover:text-doppler-red">Remove access</button>
+                          <button onClick={() => revoke(user.id, c)} className="rounded-md px-2 py-1 text-faint hover:bg-doppler-red/10 hover:text-doppler-red">Remove access</button>
                         </span>
                       </div>
                     </li>
                   );
                 })}
                 {db.enrollments.every((e) => e.userId !== user.id) && <li className="text-[13.5px] text-mute">No enrollments.</li>}
+              </ul>
+
+              <h3 className="mt-8 text-[14px] font-medium text-bone">Orders</h3>
+              <ul className="mt-3 divide-y divide-line rounded-xl border border-line">
+                {[...db.orders.filter((o) => o.userId === user.id)].reverse().map((o) => {
+                  const c = courses.find((x) => x.id === o.courseId);
+                  return (
+                    <li key={o.id} className="flex items-center gap-3 p-3.5 text-[13.5px]">
+                      <Receipt className="h-4 w-4 shrink-0 text-faint" />
+                      <div className="min-w-0 flex-1">
+                        <div className="truncate text-bone">{c?.title ?? o.courseId}</div>
+                        <div className="font-mono text-[11.5px] text-faint">{o.id} · {formatDate(o.at, "short")}</div>
+                      </div>
+                      <span className="font-mono text-bone">{formatPriceUSD(o.amountCents).replace(" USD", "")}</span>
+                      {o.status === "refunded" ? (
+                        <Tag>Refunded</Tag>
+                      ) : (
+                        <button
+                          onClick={() => {
+                            if (window.confirm(`Refund ${formatPriceUSD(o.amountCents)} and remove access to ${c?.title ?? "this course"}?`)) refund(o.id, courses);
+                          }}
+                          className="rounded-md px-2 py-1 text-[12.5px] text-faint hover:bg-doppler-red/10 hover:text-doppler-red"
+                        >
+                          Refund
+                        </button>
+                      )}
+                    </li>
+                  );
+                })}
+                {db.orders.every((o) => o.userId !== user.id) && <li className="p-3.5 text-[13.5px] text-mute">No orders.</li>}
               </ul>
             </motion.aside>
           </>

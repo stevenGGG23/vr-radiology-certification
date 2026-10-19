@@ -6,6 +6,7 @@ import { Lock, PlayCircle } from "lucide-react";
 import { ButtonLink } from "@/components/ui/button";
 import { formatPrice } from "@/lib/format";
 import type { Course, Lesson } from "@/lib/types";
+import { ProtectedVideo } from "./protected-video";
 
 function embedUrl(url: string) {
   const yt = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{6,})/);
@@ -16,23 +17,35 @@ function embedUrl(url: string) {
 }
 
 /**
+ * How a lesson's video plays: a file we control (watch rules apply), a
+ * YouTube/Vimeo embed (quick testing only; no watch rules), or nothing yet.
+ */
+export function videoKind(lesson: Lesson): "file" | "embed" | "none" {
+  if (!lesson.videoUrl) return "none";
+  return embedUrl(lesson.videoUrl) ? "embed" : "file";
+}
+
+/**
  * Lesson video. Accepts a direct MP4 URL, or a YouTube/Vimeo link for quick
  * testing. Paid content should use a host with signed, expiring playback URLs
- * (Mux, Bunny Stream, Cloudflare Stream) so a copied link stops working.
+ * (Mux or Bunny Stream) so a copied link stops working.
  */
 export function VideoPlayer({
   course,
   lesson,
   locked,
-  onEnded,
   isAdmin = false,
+  enforce = false,
+  resumeAt,
+  watermark,
+  onProgress,
+  onComplete,
 }: {
   course: Course;
   lesson: Lesson;
   locked: boolean;
-  onEnded?: () => void;
   isAdmin?: boolean;
-}) {
+} & Pick<Parameters<typeof ProtectedVideo>[0], "enforce" | "resumeAt" | "watermark" | "onProgress" | "onComplete">) {
   const frame = "on-dark relative aspect-video w-full overflow-hidden rounded-xl bg-[#0b1f3a]";
 
   if (locked) {
@@ -61,15 +74,15 @@ export function VideoPlayer({
         {embed ? (
           <iframe src={embed} title={lesson.title} className="absolute inset-0 h-full w-full" allow="autoplay; fullscreen; picture-in-picture" allowFullScreen />
         ) : (
-          <video
+          <ProtectedVideo
             key={lesson.id}
             src={lesson.videoUrl}
-            controls
-            playsInline
-            controlsList="nodownload"
-            onContextMenu={(e) => e.preventDefault()}
-            onEnded={onEnded}
-            className="absolute inset-0 h-full w-full bg-black object-contain"
+            title={lesson.title}
+            enforce={enforce}
+            resumeAt={resumeAt}
+            watermark={watermark}
+            onProgress={onProgress}
+            onComplete={onComplete}
           />
         )}
       </div>

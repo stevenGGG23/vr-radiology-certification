@@ -190,3 +190,15 @@
   /* Screen-height stretching would spill onto an extra blank sheet. */
   html, body { background: #fff !important; height: auto !important; min-height: 0 !important; }
 }
+
+/* Safari draws Apple's own Apple Pay button; other browsers keep the fallback inside it. */
+@supports (-webkit-appearance: -apple-pay-button) {
+  .apple-pay-button {
+    -webkit-appearance: -apple-pay-button;
+    -apple-pay-button-type: plain;
+    -apple-pay-button-style: black;
+  }
+  .apple-pay-button > * {
+    display: none;
+  }
+}

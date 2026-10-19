@@ -6,8 +6,9 @@ import { credentialOptions } from "@/components/auth/auth-forms";
 import { RequireAuth } from "@/components/auth/require-auth";
 import { Button } from "@/components/ui/button";
 import { Field, Input, Select } from "@/components/ui/form";
-import { Container } from "@/components/ui/primitives";
+import { Container, Tag } from "@/components/ui/primitives";
 import { formatDate } from "@/lib/format";
+import { useCatalog } from "@/lib/store/catalog";
 import { useCurrentUser, useSession } from "@/lib/store/session";
 
 export function Account() {
@@ -23,6 +24,7 @@ function AccountInner() {
   const update = useSession((s) => s.updateProfile);
   const allOrders = useSession((s) => s.db.orders);
   const orders = allOrders.filter((o) => o.userId === user.id);
+  const courses = useCatalog((s) => s.courses);
   const [form, setForm] = useState({
     name: user.name,
     credential: user.credential,
@@ -74,10 +76,18 @@ function AccountInner() {
         <p className="mt-3 text-mute">No purchases yet.</p>
       ) : (
         <ul className="mt-5 divide-y divide-line rounded-2xl border border-line text-[14.5px]">
-          {orders.map((o) => (
-            <li key={o.id} className="flex items-center justify-between p-4">
-              <span className="text-bone-dim">{o.courseId.toUpperCase()} · {formatDate(o.at, "short")}</span>
-              <span className="font-mono text-bone">${(o.amountCents / 100).toFixed(2)}</span>
+          {[...orders].reverse().map((o) => (
+            <li key={o.id} className="flex items-center justify-between gap-4 p-4">
+              <span className="min-w-0">
+                <span className="block truncate text-bone">{courses.find((c) => c.id === o.courseId)?.title ?? o.courseId}</span>
+                <span className="text-[13px] text-faint">
+                  {formatDate(o.at, "short")} · {o.method === "apple_pay" ? "Apple Pay" : o.method === "google_pay" ? "Google Pay" : "Card"} · {o.id}
+                </span>
+              </span>
+              <span className="flex shrink-0 items-center gap-3">
+                {o.status === "refunded" && <Tag>Refunded</Tag>}
+                <span className={o.status === "refunded" ? "font-mono text-faint line-through" : "font-mono text-bone"}>${(o.amountCents / 100).toFixed(2)}</span>
+              </span>
             </li>
           ))}
         </ul>

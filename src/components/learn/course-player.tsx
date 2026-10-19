@@ -17,7 +17,7 @@ import { site } from "@/lib/site";
 import { useCatalog } from "@/lib/store/catalog";
 import { useCurrentUser, useHydration, useSession } from "@/lib/store/session";
 import type { Course, Enrollment } from "@/lib/types";
-import { VideoPlayer } from "./video-player";
+import { VideoPlayer, videoKind } from "./video-player";
 
 function Curriculum({
   course,
@@ -124,6 +124,7 @@ export function CoursePlayer({ slug }: { slug: string }) {
     course ? s.db.enrollments.find((e) => e.userId === s.currentUserId && e.courseId === course.id) : undefined,
   );
   const completeLesson = useSession((s) => s.completeLesson);
+  const saveWatchProgress = useSession((s) => s.saveWatchProgress);
   const setLastLesson = useSession((s) => s.setLastLesson);
   const demoComplete = useSession((s) => s.demoCompleteCourse);
   const [drawer, setDrawer] = useState(false);
@@ -163,6 +164,8 @@ export function CoursePlayer({ slug }: { slug: string }) {
 
   const locked = hydrated ? !enrollment && !lesson.preview : !lesson.preview;
   const done = Boolean(enrollment?.completedLessonIds.includes(lesson.id));
+  // Lessons with a real video complete by watching to the end, not by a button.
+  const mustWatch = Boolean(enrollment) && !done && videoKind(lesson) === "file";
   const progress = enrollment ? progressFor(course, enrollment.completedLessonIds) : 0;
   const prev = lessons[index - 1];
   const next = lessons[index + 1];
@@ -230,8 +233,17 @@ export function CoursePlayer({ slug }: { slug: string }) {
             lesson={lesson}
             locked={locked}
             isAdmin={user?.role === "admin"}
-            onEnded={() => enrollment && completeLesson(course.id, lesson.id)}
+            enforce={mustWatch}
+            resumeAt={enrollment?.watchedSeconds?.[lesson.id]}
+            watermark={enrollment && user ? `${user.name} · ${user.email}` : undefined}
+            onProgress={(seconds) => saveWatchProgress(course.id, lesson.id, seconds)}
+            onComplete={() => completeLesson(course.id, lesson.id)}
           />
+          {mustWatch && (
+            <p className="mt-3 flex items-center gap-2 text-[13px] text-mute">
+              <Lock className="h-3.5 w-3.5 shrink-0" /> Watch to the end to complete this lesson, at any speed. Skipping ahead unlocks once it&apos;s complete.
+            </p>
+          )}
           <div className="mt-7 flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <div className="eyebrow">
@@ -244,17 +256,25 @@ export function CoursePlayer({ slug }: { slug: string }) {
                 {done && <Tag tone="phosphor"><Check className="h-3 w-3" /> Completed</Tag>}
               </div>
             </div>
-            {enrollment && (
+            {enrollment && mustWatch && next && (
+              <Button variant="secondary" disabled iconLeft={<Lock className="h-4 w-4" />}>
+                Finish the video to continue
+              </Button>
+            )}
+            {enrollment && done && next && (
+              <Button onClick={() => go(next.id)} iconRight={<ArrowRight className="h-4 w-4" />}>
+                Next lesson
+              </Button>
+            )}
+            {enrollment && !done && !mustWatch && (
               <Button
-                variant={done ? "secondary" : "primary"}
                 onClick={() => {
-                  completeLesson(course.id, lesson.id, !done);
-                  if (!done && next) go(next.id);
+                  completeLesson(course.id, lesson.id);
+                  if (next) go(next.id);
                 }}
-                iconLeft={done ? <Check className="h-4 w-4 text-phosphor" /> : undefined}
-                iconRight={!done && next ? <ArrowRight className="h-4 w-4" /> : undefined}
+                iconRight={next ? <ArrowRight className="h-4 w-4" /> : undefined}
               >
-                {done ? "Completed" : next ? "Complete & next" : "Mark complete"}
+                {next ? "Complete & next" : "Mark complete"}
               </Button>
             )}
           </div>

@@ -5,14 +5,15 @@ import { createJSONStorage, persist } from "zustand/middleware";
 import { buildDemoDb } from "../seed/demo";
 import { seedCourses } from "../seed/courses";
 import { site } from "../site";
-import type { Certificate, Course, Enrollment, ExamAttempt, Order, Role, User } from "../types";
+import type { Certificate, Course, EmailEvent, EmailMessage, Enrollment, ExamAttempt, Order, PaymentMethod, Role, User } from "../types";
 
 /*
   DEMO-ONLY "backend". Accounts, purchases, progress, exam attempts and
   certificates live in this browser's localStorage. None of this is secure,
   which is fine for a clickable draft. When the real backend lands:
     - signIn/signUp/signOut  -> auth provider (e.g. Supabase Auth, with MFA for admin)
-    - purchase               -> Stripe Checkout + webhook creates the enrollment
+    - placeOrder/refundOrder -> Stripe Checkout + webhooks create and remove enrollments
+    - emails                 -> sent by the server from those same events (Resend or Postmark)
     - recordAttempt          -> server action that grades on the server (answers never sent to the browser)
     - certificates           -> generated server-side with a public verification record
 */
@@ -23,6 +24,8 @@ interface Db {
   attempts: ExamAttempt[];
   certificates: Certificate[];
   orders: Order[];
+  /** Draft outbox: what the site would have emailed. Shown in Studio → Emails. */
+  emails: EmailMessage[];
 }
 
 type Result = { ok: true } | { ok: false; error: string };
@@ -43,12 +46,15 @@ interface SessionState {
   signInWithProvider: (identity: { name?: string | null; email: string; role?: Role }) => void;
   signOut: () => void;
   updateProfile: (patch: Partial<Pick<User, "name" | "credential" | "licenseNumber" | "organization">>) => void;
-  purchase: (course: Course) => Order | null;
+  /** One checkout: an order per course, one receipt email. */
+  placeOrder: (courses: Course[], opts: { method: PaymentMethod; discountRate?: number }) => Order[];
+  refundOrder: (orderId: string, courses: Course[]) => void;
   completeLesson: (courseId: string, lessonId: string, done?: boolean) => void;
+  saveWatchProgress: (courseId: string, lessonId: string, seconds: number) => void;
   setLastLesson: (courseId: string, lessonId: string) => void;
   recordAttempt: (course: Course, correct: number, total: number) => { attempt: ExamAttempt; certificate?: Certificate } | null;
-  grantAccess: (userId: string, courseId: string) => void;
-  revokeAccess: (userId: string, courseId: string) => void;
+  grantAccess: (userId: string, course: Course) => void;
+  revokeAccess: (userId: string, course: Course) => void;
   resetAttempts: (userId: string, courseId: string) => void;
   demoCompleteCourse: (course: Course) => void;
   resetDemo: () => void;
@@ -68,7 +74,7 @@ function certificateId() {
 }
 
 function freshDb(): Db {
-  const db = buildDemoDb();
+  const db: Db = { ...buildDemoDb(), emails: [] };
   db.certificates = db.certificates.map((c) => {
     const course = seedCourses.find((x) => x.id === c.courseId);
     return course ? { ...c, courseTitle: course.title, courseCode: course.code, ceHours: course.ceHours } : c;
@@ -87,6 +93,18 @@ function enroll(db: Db, userId: string, courseId: string, accessDays: number): E
     ...db.enrollments,
     { userId, courseId, purchasedAt: new Date(now).toISOString(), expiresAt, completedLessonIds: [] },
   ];
+}
+
+/** Records an automatic email for a user. In production the server sends it instead. */
+function withEmail(db: Db, user: User | undefined, event: EmailEvent): Db {
+  if (!user) return db;
+  const message = { ...event, id: newId("e"), userId: user.id, to: user.email, at: new Date().toISOString() } as EmailMessage;
+  return { ...db, emails: [...db.emails, message] };
+}
+
+/** The courses an order unlocks (a bundle unlocks each course it includes). */
+function unlockedIds(course: Course) {
+  return course.includes?.length ? course.includes : [course.id];
 }
 
 export const useSession = create<SessionState>()(
@@ -117,7 +135,8 @@ export const useSession = create<SessionState>()(
           role: clean === site.demoAdminEmail ? "admin" : "student",
           createdAt: new Date().toISOString(),
         };
-        set({ db: { ...db, users: [...db.users, user] }, currentUserId: user.id });
+        const next = { ...db, users: [...db.users, user] };
+        set({ db: withEmail(next, user, { template: "welcome", data: { name: user.name } }), currentUserId: user.id });
         return { ok: true };
       },
 
@@ -138,7 +157,8 @@ export const useSession = create<SessionState>()(
           role: role ?? "student",
           createdAt: new Date().toISOString(),
         };
-        set({ db: { ...db, users: [...db.users, user] }, currentUserId: user.id });
+        const next = { ...db, users: [...db.users, user] };
+        set({ db: withEmail(next, user, { template: "welcome", data: { name: user.name } }), currentUserId: user.id });
       },
 
       signOut: () => set({ currentUserId: null }),
@@ -151,22 +171,63 @@ export const useSession = create<SessionState>()(
           },
         })),
 
-      purchase: (course) => {
+      placeOrder: (courses, { method, discountRate = 0 }) => {
         const { db, currentUserId } = get();
-        if (!currentUserId) return null;
-        const ids = course.includes?.length ? course.includes : [course.id];
+        const user = db.users.find((u) => u.id === currentUserId);
+        if (!user || courses.length === 0) return [];
+        const at = new Date().toISOString();
         let enrollments = db.enrollments;
-        for (const id of ids) enrollments = enroll({ ...db, enrollments }, currentUserId, id, course.accessDays);
-        const order: Order = {
-          id: newId("o"),
-          userId: currentUserId,
-          courseId: course.id,
-          amountCents: course.priceCents,
-          at: new Date().toISOString(),
-          status: "paid",
+        const orders: Order[] = courses.map((course) => {
+          for (const id of unlockedIds(course)) enrollments = enroll({ ...db, enrollments }, user.id, id, course.accessDays);
+          const amountCents = Math.round(course.priceCents * (1 - discountRate));
+          return { id: newId("o"), userId: user.id, courseId: course.id, amountCents, at, status: "paid", method };
+        });
+        const subtotal = courses.reduce((n, c) => n + c.priceCents, 0);
+        const totalCents = orders.reduce((n, o) => n + o.amountCents, 0);
+        const next = { ...db, enrollments, orders: [...db.orders, ...orders] };
+        set({
+          db: withEmail(next, user, {
+            template: "receipt",
+            data: {
+              name: user.name,
+              orderIds: orders.map((o) => o.id),
+              items: courses.map((c) => ({ title: c.title, code: c.code, slug: c.slug, priceCents: c.priceCents, accessDays: c.accessDays })),
+              discountCents: subtotal - totalCents,
+              totalCents,
+              method,
+            },
+          }),
+        });
+        return orders;
+      },
+
+      refundOrder: (orderId, courses) => {
+        const { db } = get();
+        const order = db.orders.find((o) => o.id === orderId);
+        if (!order || order.status === "refunded") return;
+        const course = courses.find((c) => c.id === order.courseId);
+        const user = db.users.find((u) => u.id === order.userId);
+        // Keep access that another paid order still covers (e.g. a course also bought on its own).
+        const stillPaid = new Set(
+          db.orders
+            .filter((o) => o.userId === order.userId && o.id !== orderId && o.status === "paid")
+            .flatMap((o) => {
+              const c = courses.find((x) => x.id === o.courseId);
+              return c ? unlockedIds(c) : [o.courseId];
+            }),
+        );
+        const remove = (course ? unlockedIds(course) : [order.courseId]).filter((id) => !stillPaid.has(id));
+        const next: Db = {
+          ...db,
+          orders: db.orders.map((o) => (o.id === orderId ? { ...o, status: "refunded", refundedAt: new Date().toISOString() } : o)),
+          enrollments: db.enrollments.filter((e) => !(e.userId === order.userId && remove.includes(e.courseId))),
         };
-        set({ db: { ...db, enrollments, orders: [...db.orders, order] } });
-        return order;
+        set({
+          db: withEmail(next, user, {
+            template: "refund",
+            data: { name: user?.name ?? "", orderId, courseTitle: course?.title ?? order.courseId, amountCents: order.amountCents, method: order.method ?? "card" },
+          }),
+        });
       },
 
       completeLesson: (courseId, lessonId, done = true) =>
@@ -183,6 +244,19 @@ export const useSession = create<SessionState>()(
                   ? [...e.completedLessonIds, lessonId]
                   : e.completedLessonIds.filter((x) => x !== lessonId),
               };
+            }),
+          },
+        })),
+
+      saveWatchProgress: (courseId, lessonId, seconds) =>
+        set((s) => ({
+          db: {
+            ...s.db,
+            enrollments: s.db.enrollments.map((e) => {
+              if (e.userId !== s.currentUserId || e.courseId !== courseId) return e;
+              const before = e.watchedSeconds?.[lessonId] ?? 0;
+              if (seconds <= before) return e;
+              return { ...e, watchedSeconds: { ...e.watchedSeconds, [lessonId]: Math.round(seconds * 10) / 10 } };
             }),
           },
         })),
@@ -228,23 +302,43 @@ export const useSession = create<SessionState>()(
             issuedAt: attempt.at,
           };
         }
+        const next = {
+          ...db,
+          attempts: [...db.attempts, attempt],
+          certificates: certificate ? [...db.certificates, certificate] : db.certificates,
+        };
         set({
-          db: {
-            ...db,
-            attempts: [...db.attempts, attempt],
-            certificates: certificate ? [...db.certificates, certificate] : db.certificates,
-          },
+          db: certificate
+            ? withEmail(next, user, {
+                template: "certificate",
+                data: { name: user.name, courseTitle: course.title, courseCode: course.code, certificateId: certificate.id, ceHours: course.ceHours },
+              })
+            : next,
         });
         return { attempt, certificate: certificate ?? already };
       },
 
-      grantAccess: (userId, courseId) =>
-        set((s) => ({ db: { ...s.db, enrollments: enroll(s.db, userId, courseId, 365) } })),
+      grantAccess: (userId, course) =>
+        set((s) => {
+          const user = s.db.users.find((u) => u.id === userId);
+          let enrollments = s.db.enrollments;
+          for (const id of unlockedIds(course)) enrollments = enroll({ ...s.db, enrollments }, userId, id, course.accessDays);
+          return {
+            db: withEmail({ ...s.db, enrollments }, user, {
+              template: "access_granted",
+              data: { name: user?.name ?? "", courseTitle: course.title, slug: course.slug, accessDays: course.accessDays },
+            }),
+          };
+        }),
 
-      revokeAccess: (userId, courseId) =>
-        set((s) => ({
-          db: { ...s.db, enrollments: s.db.enrollments.filter((e) => !(e.userId === userId && e.courseId === courseId)) },
-        })),
+      revokeAccess: (userId, course) =>
+        set((s) => {
+          const user = s.db.users.find((u) => u.id === userId);
+          const enrollments = s.db.enrollments.filter((e) => !(e.userId === userId && e.courseId === course.id));
+          return {
+            db: withEmail({ ...s.db, enrollments }, user, { template: "access_revoked", data: { name: user?.name ?? "", courseTitle: course.title } }),
+          };
+        }),
 
       resetAttempts: (userId, courseId) =>
         set((s) => ({
@@ -268,8 +362,13 @@ export const useSession = create<SessionState>()(
     {
       name: "ria-session",
       // Bump to reset everyone's demo data when the seed changes.
-      version: 2,
-      migrate: () => ({ db: freshDb(), currentUserId: null }),
+      version: 3,
+      migrate: (persisted, version) => {
+        // v3 only added the email outbox, so keep existing accounts and progress.
+        const old = persisted as { db?: Omit<Db, "emails">; currentUserId?: string | null } | undefined;
+        if (version === 2 && old?.db) return { db: { ...old.db, emails: [] }, currentUserId: old.currentUserId ?? null };
+        return { db: freshDb(), currentUserId: null };
+      },
       storage: createJSONStorage(() => localStorage),
       skipHydration: true,
       partialize: (s) => ({ db: s.db, currentUserId: s.currentUserId }),
