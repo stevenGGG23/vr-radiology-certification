@@ -207,7 +207,7 @@ src/
     (oncall)/on-call/  Landing page served on sonosusvr.com
     studio/            Admin Studio: overview, courses, students, emails, settings
     api/auth/          Auth.js route handler (Google sign-in)
-    opengraph-image    Link-preview card; apple-icon makes the iPhone icon
+    opengraph-image    Link-preview card; icon1/icon2 are the tab icons, apple-icon the iPhone icon
   auth.ts              Auth.js configuration
   components/
     learn/             Lesson player; protected-video.tsx holds the watch rules
@@ -215,7 +215,8 @@ src/
     ...                marketing, course, certificate, layout, ui
   lib/
     email/templates.ts Every automatic email: content, triggers, HTML and text rendering
-    share-card.tsx     Design for link-preview cards and the app icon
+    brand-mark.tsx     The logo mark, defined once; every logo on the site, icons and previews draws from it
+    share-card.tsx     Design for link-preview cards and the app icons
     site.ts            Brand name, domains, provenance wording, demo flag
     seed/              Placeholder course catalog and demo records
     store/             Draft data stores (catalog, session, cart)
@@ -223,6 +224,7 @@ src/
     image-credits.ts   Licenses for every third-party image and video
 assets/
   fonts/               Plus Jakarta Sans for the preview cards (SIL Open Font License)
+Sonosus VR Logo Options/  Logo concepts, the current logo exported as files, and where it appears
 public/
   images/              Course art, photos, headshots, brand marks
   videos/              Sample ultrasound clips (CC BY 2.0)
@@ -560,7 +562,7 @@ Work through these in order of the headings. Items marked **(Dr. Rudy)** need he
 - [ ] Final course list, descriptions, objectives, prices, lessons, handouts and exam questions **(Dr. Rudy)**
 - [ ] Confirm every image and clip is de-identified (no patient names, dates of birth or record numbers burned in)
 - [ ] Captions for every lesson, checked by a person
-- [ ] Signature image for certificates and a final logo **(Dr. Rudy)**
+- [ ] Signature image for certificates and a final logo **(Dr. Rudy)**. See `Sonosus VR Logo Options/README.md` for what to send; the new mark goes in `src/lib/brand-mark.tsx`
 - [ ] Replace stock and Commons imagery with Dr. Rudy's own where possible; keep attributions for the rest
 - [ ] Confirm bio details on the About page, including licensure in 48 states
 
